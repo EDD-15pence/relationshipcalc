@@ -152,6 +152,28 @@ resultMap[key("male", ["w", "f", "m"])] = "太岳母";
 resultMap[key("female", ["h", "f", "f"])] = "太公公";
 resultMap[key("female", ["h", "f", "m"])] = "太婆婆";
 
+// 添加配偶的子女关系
+// 女性视角（老公的子女）
+resultMap[key("female", ["h", "s"])] = "儿子";
+resultMap[key("female", ["h", "d"])] = "女儿";
+// 男性视角（老婆的子女）
+resultMap[key("male", ["w", "s"])] = "儿子";
+resultMap[key("male", ["w", "d"])] = "女儿";
+
+// 添加父母的子女关系(兄弟/姐妹)
+// 爸爸的儿子
+resultMap[key("male", ["f", "s"])] = "我/兄弟";
+resultMap[key("female", ["f", "s"])] = "兄弟";
+// 爸爸的女儿
+resultMap[key("male", ["f", "d"])] = "姐妹";
+resultMap[key("female", ["f", "d"])] = "我/姐妹";
+// 妈妈的儿子
+resultMap[key("male", ["m", "s"])] = "我/兄弟";
+resultMap[key("female", ["m", "s"])] = "兄弟";
+// 妈妈的女儿
+resultMap[key("male", ["m", "d"])] = "姐妹";
+resultMap[key("female", ["m", "d"])] = "我/姐妹";
+
 function normalizePath(tokens) {
   const arr = tokens.slice();
   let changed = true;
@@ -264,22 +286,45 @@ function findReverseResult(isMale, pathTokens) {
       case "h":
         return "老婆";
       case "ob":
-      case "os":
         return male ? "弟弟" : "妹妹";
       case "yb":
-      case "ys":
         return male ? "哥哥" : "姐姐";
+      case "os":
+        return male ? "妹妹" : "妹妹";
+      case "ys":
+        return male ? "姐姐" : "姐姐";
       default:
         return "未收录的关系（待完善）";
     }
   }
+  
+  // 处理多代祖辈关系
+  if (norm.every(t => t === 'f' || t === 'm')) {
+    const generation = norm.length;
+    if (generation === 2) {
+      // 祖父母
+      return isMale ? "孙子" : "孙女";
+    } else if (generation === 3) {
+      // 曾祖父母
+      return isMale ? "曾孙子" : "曾孙女";
+    } else if (generation === 4) {
+      // 高祖父母
+      return isMale ? "玄孙子" : "玄孙女";
+    }
+  }
+  
   const a = norm[0],
     b = norm[1];
-  if (a === "f" && (b === "f" || b === "m")) return isMale ? "孙子" : "孙女";
   if (a === "m" && (b === "f" || b === "m"))
     return isMale ? "外孙子" : "外孙女";
   if (a === "w" && (b === "f" || b === "m")) return "女婿";
   if (a === "h" && (b === "f" || b === "m")) return "儿媳";
+  
+  // 处理兄弟姐妹的配偶关系
+  if ((a === "os" || a === "ys") && b === "h") {
+    return male ? "妻弟" : "弟妹";
+  }
+  
   return "未收录的关系（待完善）";
 }
 
@@ -373,7 +418,8 @@ Page({
 // 推断公式末端人物的性别：
 // 初始为我本人性别（isMale），每遇到 h/w 翻转视角性别；
 // 遇到 f/m 固定为 male/female；
-// 兄弟姐妹/子女不改变末端性别，只是关系向上/向下延伸。
+// 兄弟姐妹会设置对应的性别；
+// 儿子继承男性性别，女儿继承女性性别。
 function inferTailGender(tokens, isMale) {
   let gender = isMale ? "male" : "female";
   for (let i = 0; i < tokens.length; i++) {
@@ -382,7 +428,10 @@ function inferTailGender(tokens, isMale) {
     else if (t === "w") gender = "female";
     else if (t === "f") gender = "male";
     else if (t === "m") gender = "female";
-    // ob/yb/os/ys/s/d 不改变末端性别定义
+    else if (t === "ob" || t === "yb") gender = "male";  // 哥哥、弟弟是男性
+    else if (t === "os" || t === "ys") gender = "female";  // 姐姐、妹妹是女性
+    else if (t === "s") gender = "male";  // 儿子是男性
+    else if (t === "d") gender = "female";  // 女儿是女性
   }
   return gender;
 }
