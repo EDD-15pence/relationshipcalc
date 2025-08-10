@@ -3,7 +3,7 @@
     "pages/index/index"
   ],
   "window": {
-    "navigationBarTitleText": "亲属称呼计算器",
+    "navigationBarTitleText": "亲属称呼换算",
     "navigationBarBackgroundColor": "#ffffff",
     "navigationBarTextStyle": "black",
     "backgroundTextStyle": "light",

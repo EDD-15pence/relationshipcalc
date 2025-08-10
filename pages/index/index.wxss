@@ -82,7 +82,7 @@
 }
 .key {
   flex: 1;
-  background: #ffffff;
+  background: #ebebebb0;
   border: none;
   border-radius: 0;
   color: #000000;
