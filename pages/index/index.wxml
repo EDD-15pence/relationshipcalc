@@ -1,0 +1,46 @@
+<view class="container {{isDark ? 'dark' : ''}}">
+  <view class="top">
+    <view class="top-bar">
+      <view class="gender">
+        <text class="label">我的性别</text>
+        <radio-group class="gender-group" bindchange="onChangeGender">
+          <label class="gender-item"><radio value="male" checked="{{isMale}}" color='#000000' /> 男</label>
+          <label class="gender-item"><radio value="female" checked="{{!isMale}}" color='#000000' /> 女</label>
+        </radio-group>
+      </view>
+      <view class="top-actions">
+        <button class="icon-btn" hover-class="icon-hover" bindtap="onToggleReverse">🔄</button>
+        <button class="icon-btn" hover-class="icon-hover" bindtap="onToggleTheme">{{isDark ? '🌙' : '☀️'}}</button>
+      </view>
+    </view>
+    <view class="formula-row">
+      <text class="formula">{{formulaText}}</text>
+    </view>
+    <view class="result-large">{{displayResult}}</view>
+  </view>
+
+  <view class="spacer"></view>
+
+  <view class="keypad">
+    <view class="row">
+      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="爸爸">爸爸</button>
+      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="妈妈">妈妈</button>
+      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="老公" disabled="{{disableH}}">老公</button>
+      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="老婆" disabled="{{disableW}}">老婆</button>
+    </view>
+    <view class="row">
+      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="哥哥">哥哥</button>
+      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="弟弟">弟弟</button>
+      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="姐姐">姐姐</button>
+      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="妹妹">妹妹</button>
+    </view>
+    <view class="row">
+      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="儿子">儿子</button>
+      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="女儿">女儿</button>
+      <button class="key back" hover-class="btn-press" bindtap="onTapKey" data-key="回退">回退</button>
+      <button class="key clear" hover-class="btn-press" bindtap="onTapKey" data-key="清空">清空</button>
+    </view>
+  </view>
+</view>
+
+

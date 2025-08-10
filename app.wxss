@@ -1,0 +1,7 @@
+page {
+  background: #ffffff;
+  color: #000000;
+}
+button {
+  font-size: 30rpx;
+}
