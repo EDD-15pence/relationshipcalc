@@ -1,4 +1,4 @@
-// 亲属称呼计算核心（按 readme 口语化 + 实时 + 4/5 层支持）
+// 亲属称呼计算核心
 // token：f 爸爸, m 妈妈, h 老公, w 老婆, ob 哥哥, yb 弟弟, os 姐姐, ys 妹妹, s 儿子, d 女儿
 
 const labelToToken = {
@@ -144,6 +144,16 @@ resultMap[key("female", ["h", "ys"])] = "小姑子";
   resultMap[key(sex, ["d", "s", "d"])] = "外曾孙女";
   resultMap[key(sex, ["d", "d", "s"])] = "外曾外孙";
   resultMap[key(sex, ["d", "d", "d"])] = "外曾外孙女";
+
+  // 添加兄弟姐妹的孙辈关系
+  resultMap[key(sex, ["ob", "s", "s"])] = "侄孙";
+  resultMap[key(sex, ["ob", "s", "d"])] = "侄孙女";
+  resultMap[key(sex, ["yb", "s", "s"])] = "侄孙";
+  resultMap[key(sex, ["yb", "s", "d"])] = "侄孙女";
+  resultMap[key(sex, ["os", "s", "s"])] = "外甥孙";
+  resultMap[key(sex, ["os", "s", "d"])] = "外甥孙女";
+  resultMap[key(sex, ["ys", "s", "s"])] = "外甥孙";
+  resultMap[key(sex, ["ys", "s", "d"])] = "外甥孙女";
 });
 
 // 添加配偶的祖辈
@@ -159,6 +169,51 @@ resultMap[key("female", ["h", "d"])] = "女儿";
 // 男性视角（老婆的子女）
 resultMap[key("male", ["w", "s"])] = "儿子";
 resultMap[key("male", ["w", "d"])] = "女儿";
+
+// 添加兄弟姐妹的兄弟姐妹关系
+["male", "female"].forEach((sex) => {
+  // 兄弟姐妹的兄弟姐妹关系映射
+  // 直接亲属关系（明确的兄弟姐妹关系）
+  resultMap[key(sex, ["ob", "ob"])] = "哥哥";  
+  resultMap[key(sex, ["ob", "os"])] = "姐姐";  
+  resultMap[key(sex, ["ob", "yb"])] = "弟弟";  
+  resultMap[key(sex, ["ob", "ys"])] = "妹妹";  
+
+  resultMap[key(sex, ["yb", "ob"])] = "哥哥";  
+  resultMap[key(sex, ["yb", "os"])] = "姐姐";  
+  resultMap[key(sex, ["yb", "yb"])] = "弟弟";  
+  resultMap[key(sex, ["yb", "ys"])] = "妹妹";  
+
+  resultMap[key(sex, ["os", "ob"])] = "哥哥";  
+  resultMap[key(sex, ["os", "os"])] = "姐姐";  
+  resultMap[key(sex, ["os", "yb"])] = "弟弟";  
+  resultMap[key(sex, ["os", "ys"])] = "妹妹";  
+
+  resultMap[key(sex, ["ys", "ob"])] = "哥哥";  
+  resultMap[key(sex, ["ys", "os"])] = "姐姐";  
+  resultMap[key(sex, ["ys", "yb"])] = "弟弟";  
+  resultMap[key(sex, ["ys", "ys"])] = "妹妹";  
+});
+
+// 添加父母的兄弟姐妹关系
+// 爸爸的兄弟/姐妹
+resultMap[key("male", ["f", "ob"])] = "伯伯";
+resultMap[key("female", ["f", "ob"])] = "伯伯";
+resultMap[key("male", ["f", "yb"])] = "叔叔";
+resultMap[key("female", ["f", "yb"])] = "叔叔";
+resultMap[key("male", ["f", "os"])] = "姑姑";
+resultMap[key("female", ["f", "os"])] = "姑姑";
+resultMap[key("male", ["f", "ys"])] = "姑姑";
+resultMap[key("female", ["f", "ys"])] = "姑姑";
+// 妈妈的兄弟/姐妹
+resultMap[key("male", ["m", "ob"])] = "舅舅";
+resultMap[key("female", ["m", "ob"])] = "舅舅";
+resultMap[key("male", ["m", "yb"])] = "舅舅";
+resultMap[key("female", ["m", "yb"])] = "舅舅";
+resultMap[key("male", ["m", "os"])] = "姨妈";
+resultMap[key("female", ["m", "os"])] = "姨妈";
+resultMap[key("male", ["m", "ys"])] = "小姨";
+resultMap[key("female", ["m", "ys"])] = "小姨";
 
 // 添加父母的子女关系(兄弟/姐妹)
 // 爸爸的儿子
@@ -182,8 +237,55 @@ function normalizePath(tokens) {
     for (let i = 0; i < arr.length - 1; i++) {
       const a = arr[i],
         b = arr[i + 1];
+      // 配偶关系抵消 (h和w)
       if ((a === "h" && b === "w") || (a === "w" && b === "h")) {
         arr.splice(i, 2);
+        changed = true;
+        break;
+      }
+      // 父子/母子关系抵消
+      if (
+        (a === "s" && (b === "f" || b === "m")) ||
+        (a === "d" && (b === "f" || b === "m"))
+      ) {
+        arr.splice(i, 2);
+        changed = true;
+        break;
+      }
+      // 相同兄弟姐妹关系抵消（如哥哥的哥哥 → 哥哥）
+        if ((a === "ob" && b === "ob") || 
+            (a === "yb" && b === "yb") || 
+            (a === "os" && b === "os") || 
+            (a === "ys" && b === "ys")) {
+          arr.splice(i, 2, a);
+          changed = true;
+          break;
+        }
+        // 配偶子女关系处理：将[亲属, w/h, s/d]规范化为[亲属, s/d]
+        if ((a === "ob" || a === "yb" || a === "os" || a === "ys") && 
+            (b === "w" || b === "h") && (i + 2 < arr.length) && 
+            (arr[i + 2] === "s" || arr[i + 2] === "d")) {
+          // 保留亲属和子女关系，删除配偶关系
+          arr.splice(i + 1, 1);
+          changed = true;
+          break;
+        }
+        // 同一父母的兄弟姐妹关系抵消（仅当前面有共同父母时）
+      const siblings = ["ob", "yb", "os", "ys"];
+      if (
+        i > 0 &&
+        (arr[i - 1] === "f" || arr[i - 1] === "m") &&
+        siblings.includes(a) &&
+        siblings.includes(b) &&
+        a !== b
+      ) {
+        // 对于姐弟/兄妹关系，保留弟弟/妹妹
+        if ((a === "os" && b === "yb") || (a === "ob" && b === "ys")) {
+          arr.splice(i, 2, b);
+        } else {
+          // 其他情况保留第一个
+          arr.splice(i, 2, a);
+        }
         changed = true;
         break;
       }
@@ -229,6 +331,25 @@ function repeatStr(s, n) {
 
 function findResult(isMale, pathTokens) {
   const sex = isMale ? "male" : "female";
+  // 兄弟姐妹相互抵消的歧义：父/母 + 兄/弟/姐/妹 + 兄/弟/姐/妹
+  // 例如：妈妈-弟弟-姐姐 → 可能是 妈妈 本人，或 妈妈的姐妹（姨妈/小姨）
+  const sibs = ["ob", "yb", "os", "ys"];
+  if (
+    pathTokens.length >= 3 &&
+    (pathTokens[0] === "m" || pathTokens[0] === "f") &&
+    sibs.includes(pathTokens[1]) &&
+    sibs.includes(pathTokens[2])
+  ) {
+    const parent = pathTokens[0];
+    const lastIsMale = pathTokens[2] === "ob" || pathTokens[2] === "yb";
+    if (parent === "m") {
+      // 妈妈 + (…)+ (哥哥/弟弟) → 妈妈/舅舅；(姐姐/妹妹) → 妈妈/姨妈/小姨
+      return lastIsMale ? "舅舅" : "妈妈/姨妈/小姨";
+    } else {
+      // 爸爸 + (…)+ (哥哥/弟弟) → 爸爸/伯伯/叔叔；(姐姐/妹妹) → 姑姑
+      return lastIsMale ? "爸爸/伯伯/叔叔" : "姑姑";
+    }
+  }
   const norm = normalizePath(pathTokens);
   const direct = resultMap[key(sex, norm)];
   if (direct) return direct;
@@ -260,7 +381,7 @@ function findResult(isMale, pathTokens) {
     if (side === "f") {
       if (sib === "ob") return spouse === "w" ? "伯母" : "伯伯";
       if (sib === "yb") return spouse === "w" ? "婶婶" : "叔叔";
-      if (sib === "os" || sib === "ys") return spouse === "h" ? "姑父" : "姑妈";
+      if (sib === "os" || sib === "ys") return spouse === "h" ? "姑父" : "姑姑";
     } else {
       if (sib === "ob" || sib === "yb") return spouse === "w" ? "舅妈" : "舅舅";
       if (sib === "os" || sib === "ys") return spouse === "h" ? "姨夫" : "姨妈";
@@ -297,9 +418,9 @@ function findReverseResult(isMale, pathTokens) {
         return "未收录的关系（待完善）";
     }
   }
-  
+
   // 处理多代祖辈关系
-  if (norm.every(t => t === 'f' || t === 'm')) {
+  if (norm.every((t) => t === "f" || t === "m")) {
     const generation = norm.length;
     if (generation === 2) {
       // 祖父母
@@ -312,19 +433,19 @@ function findReverseResult(isMale, pathTokens) {
       return isMale ? "玄孙子" : "玄孙女";
     }
   }
-  
+
   const a = norm[0],
     b = norm[1];
   if (a === "m" && (b === "f" || b === "m"))
     return isMale ? "外孙子" : "外孙女";
   if (a === "w" && (b === "f" || b === "m")) return "女婿";
   if (a === "h" && (b === "f" || b === "m")) return "儿媳";
-  
+
   // 处理兄弟姐妹的配偶关系
   if ((a === "os" || a === "ys") && b === "h") {
     return male ? "妻弟" : "弟妹";
   }
-  
+
   return "未收录的关系（待完善）";
 }
 
@@ -428,10 +549,10 @@ function inferTailGender(tokens, isMale) {
     else if (t === "w") gender = "female";
     else if (t === "f") gender = "male";
     else if (t === "m") gender = "female";
-    else if (t === "ob" || t === "yb") gender = "male";  // 哥哥、弟弟是男性
-    else if (t === "os" || t === "ys") gender = "female";  // 姐姐、妹妹是女性
-    else if (t === "s") gender = "male";  // 儿子是男性
-    else if (t === "d") gender = "female";  // 女儿是女性
+    else if (t === "ob" || t === "yb") gender = "male"; // 哥哥、弟弟是男性
+    else if (t === "os" || t === "ys") gender = "female"; // 姐姐、妹妹是女性
+    else if (t === "s") gender = "male"; // 儿子是男性
+    else if (t === "d") gender = "female"; // 女儿是女性
   }
   return gender;
 }
