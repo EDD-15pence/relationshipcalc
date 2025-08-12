@@ -18,216 +18,180 @@ function key(sex, path) {
   return sex + "|" + path.join("-");
 }
 
+// 辅助函数：为男女两种性别执行相同操作
+function forBothGenders(callback) {
+  ["male", "female"].forEach(callback);
+}
+
+// 亲属关系映射配置
+const relationshipMappings = [
+  // 基础亲属关系（通用）
+  { path: ["f"], name: "爸爸", gender: "both" },
+  { path: ["m"], name: "妈妈", gender: "both" },
+  { path: ["h"], name: "老公", gender: "female" },
+  { path: ["w"], name: "老婆", gender: "male" },
+  { path: ["ob"], name: "哥哥", gender: "both" },
+  { path: ["yb"], name: "弟弟", gender: "both" },
+  { path: ["os"], name: "姐姐", gender: "both" },
+  { path: ["ys"], name: "妹妹", gender: "both" },
+  { path: ["s"], name: "儿子", gender: "both" },
+  { path: ["d"], name: "女儿", gender: "both" },
+  // 配偶的父母（通用）
+  { path: ["f", "w"], name: "妈妈", gender: "both" },
+  { path: ["m", "h"], name: "爸爸", gender: "both" },
+  // 祖辈（通用）
+  { path: ["f", "f"], name: "爷爷", gender: "both" },
+  { path: ["f", "m"], name: "奶奶", gender: "both" },
+  { path: ["m", "f"], name: "外公", gender: "both" },
+  { path: ["m", "m"], name: "外婆", gender: "both" },
+  // 兄弟姐妹的配偶（通用）
+  { path: ["ob", "w"], name: "嫂子", gender: "both" },
+  { path: ["yb", "w"], name: "弟媳", gender: "both" },
+  { path: ["os", "h"], name: "姐夫", gender: "both" },
+  { path: ["ys", "h"], name: "妹夫", gender: "both" },
+  // 子女的配偶（通用）
+  { path: ["s", "w"], name: "儿媳", gender: "both" },
+  { path: ["d", "h"], name: "女婿", gender: "both" },
+  // 兄弟姐妹的子女（通用）
+  { path: ["ob", "s"], name: "侄子", gender: "both" },
+  { path: ["ob", "d"], name: "侄女", gender: "both" },
+  { path: ["yb", "s"], name: "侄子", gender: "both" },
+  { path: ["yb", "d"], name: "侄女", gender: "both" },
+  { path: ["os", "s"], name: "外甥", gender: "both" },
+  { path: ["os", "d"], name: "外甥女", gender: "both" },
+  { path: ["ys", "s"], name: "外甥", gender: "both" },
+  { path: ["ys", "d"], name: "外甥女", gender: "both" },
+  // 堂亲关系 (父亲的兄弟姐妹的子女)（通用）
+  { path: ["f", "ob", "s"], name: "堂哥", gender: "both" },
+  { path: ["f", "ob", "d"], name: "堂姐", gender: "both" },
+  { path: ["f", "yb", "s"], name: "堂弟", gender: "both" },
+  { path: ["f", "yb", "d"], name: "堂妹", gender: "both" },
+  { path: ["f", "os", "s"], name: "表哥", gender: "both" },
+  { path: ["f", "os", "d"], name: "表姐", gender: "both" },
+  { path: ["f", "ys", "s"], name: "表弟", gender: "both" },
+  { path: ["f", "ys", "d"], name: "表妹", gender: "both" },
+  // 表亲关系 (母亲的兄弟姐妹的子女)（通用）
+  { path: ["m", "ob", "s"], name: "表哥", gender: "both" },
+  { path: ["m", "ob", "d"], name: "表姐", gender: "both" },
+  { path: ["m", "yb", "s"], name: "表弟", gender: "both" },
+  { path: ["m", "yb", "d"], name: "表妹", gender: "both" },
+  { path: ["m", "os", "s"], name: "表哥", gender: "both" },
+  { path: ["m", "os", "d"], name: "表姐", gender: "both" },
+  { path: ["m", "ys", "s"], name: "表弟", gender: "both" },
+  { path: ["m", "ys", "d"], name: "表妹", gender: "both" },
+  // 祖辈的兄弟姐妹关系（通用）
+  { path: ["f", "f", "ob"], name: "伯公", gender: "both" },
+  { path: ["f", "f", "os"], name: "姑婆", gender: "both" },
+  { path: ["f", "m", "ob"], name: "舅公", gender: "both" },
+  { path: ["f", "m", "os"], name: "姨婆", gender: "both" },
+  { path: ["m", "f", "ob"], name: "伯公", gender: "both" },
+  { path: ["m", "f", "os"], name: "姑婆", gender: "both" },
+  { path: ["m", "m", "ob"], name: "舅公", gender: "both" },
+  { path: ["m", "m", "os"], name: "姨婆", gender: "both" },
+  // 曾祖辈关系（通用）
+  { path: ["f", "f", "f"], name: "曾祖父", gender: "both" },
+  { path: ["f", "f", "m"], name: "曾祖母", gender: "both" },
+  { path: ["f", "m", "f"], name: "曾外祖父", gender: "both" },
+  { path: ["f", "m", "m"], name: "曾外祖母", gender: "both" },
+  { path: ["m", "f", "f"], name: "外曾祖父", gender: "both" },
+  { path: ["m", "f", "m"], name: "外曾祖母", gender: "both" },
+  { path: ["m", "m", "f"], name: "外曾外祖父", gender: "both" },
+  { path: ["m", "m", "m"], name: "外曾外祖母", gender: "both" },
+  // 孙辈的子女（通用）
+  { path: ["s", "s"], name: "孙子", gender: "both" },
+  { path: ["s", "d"], name: "孙女", gender: "both" },
+  { path: ["d", "s"], name: "外孙", gender: "both" },
+  { path: ["d", "d"], name: "外孙女", gender: "both" },
+  // 曾孙辈（通用）
+  { path: ["s", "s", "s"], name: "曾孙子", gender: "both" },
+  { path: ["s", "s", "d"], name: "曾孙女", gender: "both" },
+  { path: ["s", "d", "s"], name: "曾外孙", gender: "both" },
+  { path: ["s", "d", "d"], name: "曾外孙女", gender: "both" },
+  { path: ["d", "s", "s"], name: "外曾孙子", gender: "both" },
+  { path: ["d", "s", "d"], name: "外曾孙女", gender: "both" },
+  { path: ["d", "d", "s"], name: "外曾外孙", gender: "both" },
+  { path: ["d", "d", "d"], name: "外曾外孙女", gender: "both" },
+  // 兄弟姐妹的孙辈关系（通用）
+  { path: ["ob", "s", "s"], name: "侄孙", gender: "both" },
+  { path: ["ob", "s", "d"], name: "侄孙女", gender: "both" },
+  { path: ["yb", "s", "s"], name: "侄孙", gender: "both" },
+  { path: ["yb", "s", "d"], name: "侄孙女", gender: "both" },
+  { path: ["os", "s", "s"], name: "外甥孙", gender: "both" },
+  { path: ["os", "s", "d"], name: "外甥孙女", gender: "both" },
+  { path: ["ys", "s", "s"], name: "外甥孙", gender: "both" },
+  { path: ["ys", "s", "d"], name: "外甥孙女", gender: "both" },
+  // 兄弟姐妹的兄弟姐妹关系（通用）
+  { path: ["ob", "ob"], name: "哥哥", gender: "both" },
+  { path: ["ob", "os"], name: "姐姐", gender: "both" },
+  { path: ["ob", "yb"], name: "弟弟", gender: "both" },
+  { path: ["ob", "ys"], name: "妹妹", gender: "both" },
+  { path: ["yb", "ob"], name: "哥哥", gender: "both" },
+  { path: ["yb", "os"], name: "姐姐", gender: "both" },
+  { path: ["yb", "yb"], name: "弟弟", gender: "both" },
+  { path: ["yb", "ys"], name: "妹妹", gender: "both" },
+  { path: ["os", "ob"], name: "哥哥", gender: "both" },
+  { path: ["os", "os"], name: "姐姐", gender: "both" },
+  { path: ["os", "yb"], name: "弟弟", gender: "both" },
+  { path: ["os", "ys"], name: "妹妹", gender: "both" },
+  { path: ["ys", "ob"], name: "哥哥", gender: "both" },
+  { path: ["ys", "os"], name: "姐姐", gender: "both" },
+  { path: ["ys", "yb"], name: "弟弟", gender: "both" },
+  { path: ["ys", "ys"], name: "妹妹", gender: "both" },
+  // 配偶的父母（性别特定）
+  { path: ["w", "f"], name: "岳父", gender: "male" },
+  { path: ["w", "m"], name: "岳母", gender: "male" },
+  { path: ["h", "f"], name: "公公", gender: "female" },
+  { path: ["h", "m"], name: "婆婆", gender: "female" },
+  // 配偶的亲属关系（性别特定）
+  { path: ["w", "ob"], name: "大舅子", gender: "male" },
+  { path: ["w", "yb"], name: "小舅子", gender: "male" },
+  { path: ["w", "os"], name: "大姨子", gender: "male" },
+  { path: ["w", "ys"], name: "小姨子", gender: "male" },
+  { path: ["h", "ob"], name: "大伯子", gender: "female" },
+  { path: ["h", "yb"], name: "小叔子", gender: "female" },
+  { path: ["h", "os"], name: "大姑子", gender: "female" },
+  { path: ["h", "ys"], name: "小姑子", gender: "female" },
+  // 配偶的祖辈（性别特定）
+  { path: ["w", "f", "f"], name: "太岳父", gender: "male" },
+  { path: ["w", "f", "m"], name: "太岳母", gender: "male" },
+  { path: ["h", "f", "f"], name: "太公公", gender: "female" },
+  { path: ["h", "f", "m"], name: "太婆婆", gender: "female" },
+  // 配偶的子女关系（性别特定）
+  { path: ["h", "s"], name: "儿子", gender: "female" },
+  { path: ["h", "d"], name: "女儿", gender: "female" },
+  { path: ["w", "s"], name: "儿子", gender: "male" },
+  { path: ["w", "d"], name: "女儿", gender: "male" },
+  // 父母的兄弟姐妹关系（性别特定）
+  { path: ["f", "ob"], name: "伯伯", gender: "both" },
+  { path: ["f", "yb"], name: "叔叔", gender: "both" }, // 爸爸的弟弟(无论排行)都是叔叔
+  { path: ["f", "os"], name: "姑姑", gender: "both" },
+  { path: ["f", "ys"], name: "姑姑", gender: "both" },
+  { path: ["m", "ob"], name: "舅舅", gender: "both" },
+  { path: ["m", "yb"], name: "舅舅", gender: "both" },
+  { path: ["m", "os"], name: "姨妈", gender: "both" },
+  { path: ["m", "ys"], name: "小姨", gender: "both" },
+  // 父母的子女关系（性别特定）
+  { path: ["f", "s"], name: "我/兄弟", gender: "male" },
+  { path: ["f", "s"], name: "兄弟", gender: "female" },
+  { path: ["f", "d"], name: "姐妹", gender: "male" },
+  { path: ["f", "d"], name: "我/姐妹", gender: "female" },
+  { path: ["m", "s"], name: "我/兄弟", gender: "male" },
+  { path: ["m", "s"], name: "兄弟", gender: "female" },
+  { path: ["m", "d"], name: "姐妹", gender: "male" },
+  { path: ["m", "d"], name: "我/姐妹", gender: "female" },
+];
+
 const resultMap = {};
-["male", "female"].forEach((sex) => {
-  resultMap[key(sex, ["f"])] = "爸爸";
-  resultMap[key(sex, ["m"])] = "妈妈";
-  resultMap[key(sex, ["h"])] = "老公";
-  resultMap[key(sex, ["w"])] = "老婆";
-  resultMap[key(sex, ["ob"])] = "哥哥";
-  resultMap[key(sex, ["yb"])] = "弟弟";
-  resultMap[key(sex, ["os"])] = "姐姐";
-  resultMap[key(sex, ["ys"])] = "妹妹";
-  resultMap[key(sex, ["s"])] = "儿子";
-  resultMap[key(sex, ["d"])] = "女儿";
+
+// 处理亲属关系映射
+forBothGenders((sex) => {
+  relationshipMappings.forEach((mapping) => {
+    // 如果gender为both或与当前性别匹配，则添加到resultMap
+    if (mapping.gender === "both" || mapping.gender === sex) {
+      resultMap[key(sex, mapping.path)] = mapping.name;
+    }
+  });
 });
-["male", "female"].forEach((sex) => {
-  resultMap[key(sex, ["f", "w"])] = "妈妈";
-  resultMap[key(sex, ["m", "h"])] = "爸爸";
-});
-resultMap[key("male", ["w", "f"])] = "岳父";
-resultMap[key("male", ["w", "m"])] = "岳母";
-resultMap[key("female", ["h", "f"])] = "公公";
-resultMap[key("female", ["h", "m"])] = "婆婆";
-["male", "female"].forEach((sex) => {
-  resultMap[key(sex, ["f", "f"])] = "爷爷";
-  resultMap[key(sex, ["f", "m"])] = "奶奶";
-  resultMap[key(sex, ["m", "f"])] = "外公";
-  resultMap[key(sex, ["m", "m"])] = "外婆";
-});
-["male", "female"].forEach((sex) => {
-  resultMap[key(sex, ["ob", "w"])] = "嫂子";
-  resultMap[key(sex, ["yb", "w"])] = "弟媳";
-  resultMap[key(sex, ["os", "h"])] = "姐夫";
-  resultMap[key(sex, ["ys", "h"])] = "妹夫";
-});
-["male", "female"].forEach((sex) => {
-  resultMap[key(sex, ["s", "w"])] = "儿媳";
-  resultMap[key(sex, ["d", "h"])] = "女婿";
-});
-
-// 添加兄弟姐妹的子女关系
-["male", "female"].forEach((sex) => {
-  resultMap[key(sex, ["ob", "s"])] = "侄子";
-  resultMap[key(sex, ["ob", "d"])] = "侄女";
-  resultMap[key(sex, ["yb", "s"])] = "侄子";
-  resultMap[key(sex, ["yb", "d"])] = "侄女";
-  resultMap[key(sex, ["os", "s"])] = "外甥";
-  resultMap[key(sex, ["os", "d"])] = "外甥女";
-  resultMap[key(sex, ["ys", "s"])] = "外甥";
-  resultMap[key(sex, ["ys", "d"])] = "外甥女";
-});
-
-// 添加堂亲关系 (父亲的兄弟姐妹的子女)
-["male", "female"].forEach((sex) => {
-  resultMap[key(sex, ["f", "ob", "s"])] = "堂哥";
-  resultMap[key(sex, ["f", "ob", "d"])] = "堂姐";
-  resultMap[key(sex, ["f", "yb", "s"])] = "堂弟";
-  resultMap[key(sex, ["f", "yb", "d"])] = "堂妹";
-  resultMap[key(sex, ["f", "os", "s"])] = "表哥";
-  resultMap[key(sex, ["f", "os", "d"])] = "表姐";
-  resultMap[key(sex, ["f", "ys", "s"])] = "表弟";
-  resultMap[key(sex, ["f", "ys", "d"])] = "表妹";
-});
-
-// 添加表亲关系 (母亲的兄弟姐妹的子女)
-["male", "female"].forEach((sex) => {
-  resultMap[key(sex, ["m", "ob", "s"])] = "表哥";
-  resultMap[key(sex, ["m", "ob", "d"])] = "表姐";
-  resultMap[key(sex, ["m", "yb", "s"])] = "表弟";
-  resultMap[key(sex, ["m", "yb", "d"])] = "表妹";
-  resultMap[key(sex, ["m", "os", "s"])] = "表哥";
-  resultMap[key(sex, ["m", "os", "d"])] = "表姐";
-  resultMap[key(sex, ["m", "ys", "s"])] = "表弟";
-  resultMap[key(sex, ["m", "ys", "d"])] = "表妹";
-});
-
-// 添加祖辈的兄弟姐妹关系
-["male", "female"].forEach((sex) => {
-  resultMap[key(sex, ["f", "f", "ob"])] = "伯公";
-  resultMap[key(sex, ["f", "f", "os"])] = "姑婆";
-  resultMap[key(sex, ["f", "m", "ob"])] = "舅公";
-  resultMap[key(sex, ["f", "m", "os"])] = "姨婆";
-  resultMap[key(sex, ["m", "f", "ob"])] = "伯公";
-  resultMap[key(sex, ["m", "f", "os"])] = "姑婆";
-  resultMap[key(sex, ["m", "m", "ob"])] = "舅公";
-  resultMap[key(sex, ["m", "m", "os"])] = "姨婆";
-});
-
-// 添加曾祖辈关系
-["male", "female"].forEach((sex) => {
-  resultMap[key(sex, ["f", "f", "f"])] = "曾祖父";
-  resultMap[key(sex, ["f", "f", "m"])] = "曾祖母";
-  resultMap[key(sex, ["f", "m", "f"])] = "曾外祖父";
-  resultMap[key(sex, ["f", "m", "m"])] = "曾外祖母";
-  resultMap[key(sex, ["m", "f", "f"])] = "外曾祖父";
-  resultMap[key(sex, ["m", "f", "m"])] = "外曾祖母";
-  resultMap[key(sex, ["m", "m", "f"])] = "外曾外祖父";
-  resultMap[key(sex, ["m", "m", "m"])] = "外曾外祖母";
-});
-
-// 添加配偶的亲属关系
-resultMap[key("male", ["w", "ob"])] = "大舅子";
-resultMap[key("male", ["w", "yb"])] = "小舅子";
-resultMap[key("male", ["w", "os"])] = "大姨子";
-resultMap[key("male", ["w", "ys"])] = "小姨子";
-resultMap[key("female", ["h", "ob"])] = "大伯子";
-resultMap[key("female", ["h", "yb"])] = "小叔子";
-resultMap[key("female", ["h", "os"])] = "大姑子";
-resultMap[key("female", ["h", "ys"])] = "小姑子";
-
-// 添加孙辈的子女
-["male", "female"].forEach((sex) => {
-  resultMap[key(sex, ["s", "s"])] = "孙子";
-  resultMap[key(sex, ["s", "d"])] = "孙女";
-  resultMap[key(sex, ["d", "s"])] = "外孙";
-  resultMap[key(sex, ["d", "d"])] = "外孙女";
-});
-
-// 添加曾孙辈
-["male", "female"].forEach((sex) => {
-  resultMap[key(sex, ["s", "s", "s"])] = "曾孙子";
-  resultMap[key(sex, ["s", "s", "d"])] = "曾孙女";
-  resultMap[key(sex, ["s", "d", "s"])] = "曾外孙";
-  resultMap[key(sex, ["s", "d", "d"])] = "曾外孙女";
-  resultMap[key(sex, ["d", "s", "s"])] = "外曾孙子";
-  resultMap[key(sex, ["d", "s", "d"])] = "外曾孙女";
-  resultMap[key(sex, ["d", "d", "s"])] = "外曾外孙";
-  resultMap[key(sex, ["d", "d", "d"])] = "外曾外孙女";
-
-  // 添加兄弟姐妹的孙辈关系
-  resultMap[key(sex, ["ob", "s", "s"])] = "侄孙";
-  resultMap[key(sex, ["ob", "s", "d"])] = "侄孙女";
-  resultMap[key(sex, ["yb", "s", "s"])] = "侄孙";
-  resultMap[key(sex, ["yb", "s", "d"])] = "侄孙女";
-  resultMap[key(sex, ["os", "s", "s"])] = "外甥孙";
-  resultMap[key(sex, ["os", "s", "d"])] = "外甥孙女";
-  resultMap[key(sex, ["ys", "s", "s"])] = "外甥孙";
-  resultMap[key(sex, ["ys", "s", "d"])] = "外甥孙女";
-});
-
-// 添加配偶的祖辈
-resultMap[key("male", ["w", "f", "f"])] = "太岳父";
-resultMap[key("male", ["w", "f", "m"])] = "太岳母";
-resultMap[key("female", ["h", "f", "f"])] = "太公公";
-resultMap[key("female", ["h", "f", "m"])] = "太婆婆";
-
-// 添加配偶的子女关系
-// 女性视角（老公的子女）
-resultMap[key("female", ["h", "s"])] = "儿子";
-resultMap[key("female", ["h", "d"])] = "女儿";
-// 男性视角（老婆的子女）
-resultMap[key("male", ["w", "s"])] = "儿子";
-resultMap[key("male", ["w", "d"])] = "女儿";
-
-// 添加兄弟姐妹的兄弟姐妹关系
-["male", "female"].forEach((sex) => {
-  // 兄弟姐妹的兄弟姐妹关系映射
-  // 直接亲属关系（明确的兄弟姐妹关系）
-  resultMap[key(sex, ["ob", "ob"])] = "哥哥";  
-  resultMap[key(sex, ["ob", "os"])] = "姐姐";  
-  resultMap[key(sex, ["ob", "yb"])] = "弟弟";  
-  resultMap[key(sex, ["ob", "ys"])] = "妹妹";  
-
-  resultMap[key(sex, ["yb", "ob"])] = "哥哥";  
-  resultMap[key(sex, ["yb", "os"])] = "姐姐";  
-  resultMap[key(sex, ["yb", "yb"])] = "弟弟";  
-  resultMap[key(sex, ["yb", "ys"])] = "妹妹";  
-
-  resultMap[key(sex, ["os", "ob"])] = "哥哥";  
-  resultMap[key(sex, ["os", "os"])] = "姐姐";  
-  resultMap[key(sex, ["os", "yb"])] = "弟弟";  
-  resultMap[key(sex, ["os", "ys"])] = "妹妹";  
-
-  resultMap[key(sex, ["ys", "ob"])] = "哥哥";  
-  resultMap[key(sex, ["ys", "os"])] = "姐姐";  
-  resultMap[key(sex, ["ys", "yb"])] = "弟弟";  
-  resultMap[key(sex, ["ys", "ys"])] = "妹妹";  
-});
-
-// 添加父母的兄弟姐妹关系
-// 爸爸的兄弟/姐妹
-resultMap[key("male", ["f", "ob"])] = "伯伯";
-resultMap[key("female", ["f", "ob"])] = "伯伯";
-resultMap[key("male", ["f", "yb"])] = "叔叔";
-resultMap[key("female", ["f", "yb"])] = "叔叔";
-resultMap[key("male", ["f", "os"])] = "姑姑";
-resultMap[key("female", ["f", "os"])] = "姑姑";
-resultMap[key("male", ["f", "ys"])] = "姑姑";
-resultMap[key("female", ["f", "ys"])] = "姑姑";
-// 妈妈的兄弟/姐妹
-resultMap[key("male", ["m", "ob"])] = "舅舅";
-resultMap[key("female", ["m", "ob"])] = "舅舅";
-resultMap[key("male", ["m", "yb"])] = "舅舅";
-resultMap[key("female", ["m", "yb"])] = "舅舅";
-resultMap[key("male", ["m", "os"])] = "姨妈";
-resultMap[key("female", ["m", "os"])] = "姨妈";
-resultMap[key("male", ["m", "ys"])] = "小姨";
-resultMap[key("female", ["m", "ys"])] = "小姨";
-
-// 添加父母的子女关系(兄弟/姐妹)
-// 爸爸的儿子
-resultMap[key("male", ["f", "s"])] = "我/兄弟";
-resultMap[key("female", ["f", "s"])] = "兄弟";
-// 爸爸的女儿
-resultMap[key("male", ["f", "d"])] = "姐妹";
-resultMap[key("female", ["f", "d"])] = "我/姐妹";
-// 妈妈的儿子
-resultMap[key("male", ["m", "s"])] = "我/兄弟";
-resultMap[key("female", ["m", "s"])] = "兄弟";
-// 妈妈的女儿
-resultMap[key("male", ["m", "d"])] = "姐妹";
-resultMap[key("female", ["m", "d"])] = "我/姐妹";
 
 function normalizePath(tokens) {
   const arr = tokens.slice();
@@ -252,25 +216,30 @@ function normalizePath(tokens) {
         changed = true;
         break;
       }
-      // 相同兄弟姐妹关系抵消（如哥哥的哥哥 → 哥哥）
-        if ((a === "ob" && b === "ob") || 
-            (a === "yb" && b === "yb") || 
-            (a === "os" && b === "os") || 
-            (a === "ys" && b === "ys")) {
-          arr.splice(i, 2, a);
-          changed = true;
-          break;
-        }
-        // 配偶子女关系处理：将[亲属, w/h, s/d]规范化为[亲属, s/d]
-        if ((a === "ob" || a === "yb" || a === "os" || a === "ys") && 
-            (b === "w" || b === "h") && (i + 2 < arr.length) && 
-            (arr[i + 2] === "s" || arr[i + 2] === "d")) {
-          // 保留亲属和子女关系，删除配偶关系
-          arr.splice(i + 1, 1);
-          changed = true;
-          break;
-        }
-        // 同一父母的兄弟姐妹关系抵消（仅当前面有共同父母时）
+      // 配偶子女关系处理：将[亲属, w/h, s/d]规范化为[亲属, s/d]
+      if (
+        (a === "ob" || a === "yb" || a === "os" || a === "ys") &&
+        (b === "w" || b === "h") &&
+        i + 2 < arr.length &&
+        (arr[i + 2] === "s" || arr[i + 2] === "d")
+      ) {
+        // 保留亲属和子女关系，删除配偶关系
+        arr.splice(i + 1, 1);
+        changed = true;
+        break;
+      }
+      // 相同兄弟姐妹关系抵消（无论是否有共同父母）
+      if (
+        (a === "ob" && b === "ob") ||
+        (a === "yb" && b === "yb") ||
+        (a === "os" && b === "os") ||
+        (a === "ys" && b === "ys")
+      ) {
+        arr.splice(i, 2, a);
+        changed = true;
+        break;
+      }
+      // 同一父母的兄弟姐妹关系抵消（仅当前面有共同父母时）
       const siblings = ["ob", "yb", "os", "ys"];
       if (
         i > 0 &&
@@ -324,9 +293,8 @@ function buildDescendantName(sdSeq) {
 }
 
 function repeatStr(s, n) {
-  let out = "";
-  for (let i = 0; i < n; i++) out += s;
-  return out;
+  // 使用Array.fill和join替代for循环
+  return Array(n).fill(s).join("");
 }
 
 function findResult(isMale, pathTokens) {
@@ -338,7 +306,8 @@ function findResult(isMale, pathTokens) {
     pathTokens.length >= 3 &&
     (pathTokens[0] === "m" || pathTokens[0] === "f") &&
     sibs.includes(pathTokens[1]) &&
-    sibs.includes(pathTokens[2])
+    sibs.includes(pathTokens[2]) &&
+    pathTokens[1] !== pathTokens[2]
   ) {
     const parent = pathTokens[0];
     const lastIsMale = pathTokens[2] === "ob" || pathTokens[2] === "yb";
