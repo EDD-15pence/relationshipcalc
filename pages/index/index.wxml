@@ -11,6 +11,7 @@
       <view class="top-actions">
         <button class="icon-btn" hover-class="icon-hover" bindtap="onToggleReverse">🔄</button>
         <button class="icon-btn" hover-class="icon-hover" bindtap="onToggleTheme">{{isDark ? '🌙' : '☀️'}}</button>
+        <button class="icon-btn" hover-class="icon-hover" bindtap="onShare">📤</button>
       </view>
     </view>
     <view class="formula-row">

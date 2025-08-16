@@ -14,6 +14,20 @@ const labelToToken = {
   女儿: "d",
 };
 
+// token -> 中文标签（用于回退生成可读关系字符串）
+const tokenToLabel = {
+  f: "爸爸",
+  m: "妈妈",
+  h: "老公",
+  w: "老婆",
+  ob: "哥哥",
+  yb: "弟弟",
+  os: "姐姐",
+  ys: "妹妹",
+  s: "儿子",
+  d: "女儿",
+};
+
 function key(sex, path) {
   return sex + "|" + path.join("-");
 }
@@ -88,6 +102,73 @@ const relationshipMappings = [
   { path: ["m", "f", "os"], name: "姑婆", gender: "both" },
   { path: ["m", "m", "ob"], name: "舅公", gender: "both" },
   { path: ["m", "m", "os"], name: "姨婆", gender: "both" },
+  // 兄弟姐妹的父母关系（通用）
+  { path: ["f", "ob", "f"], name: "爷爷", gender: "both" },
+  { path: ["f", "ob", "m"], name: "奶奶", gender: "both" },
+  { path: ["f", "yb", "f"], name: "爷爷", gender: "both" },
+  { path: ["f", "yb", "m"], name: "奶奶", gender: "both" },
+  { path: ["f", "os", "f"], name: "爷爷", gender: "both" },
+  { path: ["f", "os", "m"], name: "奶奶", gender: "both" },
+  { path: ["f", "ys", "f"], name: "爷爷", gender: "both" },
+  { path: ["f", "ys", "m"], name: "奶奶", gender: "both" },
+  { path: ["m", "ob", "f"], name: "外公", gender: "both" },
+  { path: ["m", "ob", "m"], name: "外婆", gender: "both" },
+  { path: ["m", "yb", "f"], name: "外公", gender: "both" },
+  { path: ["m", "yb", "m"], name: "外婆", gender: "both" },
+  { path: ["m", "os", "f"], name: "外公", gender: "both" },
+  { path: ["m", "os", "m"], name: "外婆", gender: "both" },
+  { path: ["m", "ys", "f"], name: "外公", gender: "both" },
+  { path: ["m", "ys", "m"], name: "外婆", gender: "both" },
+  // 兄弟姐妹的父母的配偶关系（通用）
+  { path: ["f", "ob", "f", "w"], name: "奶奶", gender: "both" },
+  { path: ["f", "ob", "f", "h"], name: "爷爷", gender: "both" },
+  { path: ["f", "ob", "m", "w"], name: "奶奶", gender: "both" },
+  { path: ["f", "ob", "m", "h"], name: "爷爷", gender: "both" },
+  { path: ["f", "yb", "f", "w"], name: "奶奶", gender: "both" },
+  { path: ["f", "yb", "f", "h"], name: "爷爷", gender: "both" },
+  { path: ["f", "yb", "m", "w"], name: "奶奶", gender: "both" },
+  { path: ["f", "yb", "m", "h"], name: "爷爷", gender: "both" },
+  { path: ["f", "os", "f", "w"], name: "奶奶", gender: "both" },
+  { path: ["f", "os", "f", "h"], name: "爷爷", gender: "both" },
+  { path: ["f", "os", "m", "w"], name: "奶奶", gender: "both" },
+  { path: ["f", "os", "m", "h"], name: "爷爷", gender: "both" },
+  { path: ["f", "ys", "f", "w"], name: "奶奶", gender: "both" },
+  { path: ["f", "ys", "f", "h"], name: "爷爷", gender: "both" },
+  { path: ["f", "ys", "m", "w"], name: "奶奶", gender: "both" },
+  { path: ["f", "ys", "m", "h"], name: "爷爷", gender: "both" },
+  { path: ["m", "ob", "f", "w"], name: "外婆", gender: "both" },
+  { path: ["m", "ob", "f", "h"], name: "外公", gender: "both" },
+  { path: ["m", "ob", "m", "w"], name: "外婆", gender: "both" },
+  { path: ["m", "ob", "m", "h"], name: "外公", gender: "both" },
+  { path: ["m", "yb", "f", "w"], name: "外婆", gender: "both" },
+  { path: ["m", "yb", "f", "h"], name: "外公", gender: "both" },
+  { path: ["m", "yb", "m", "w"], name: "外婆", gender: "both" },
+  { path: ["m", "yb", "m", "h"], name: "外公", gender: "both" },
+  { path: ["m", "os", "f", "w"], name: "外婆", gender: "both" },
+  { path: ["m", "os", "f", "h"], name: "外公", gender: "both" },
+  { path: ["m", "os", "m", "w"], name: "外婆", gender: "both" },
+  { path: ["m", "os", "m", "h"], name: "外公", gender: "both" },
+  { path: ["m", "ys", "f", "w"], name: "外婆", gender: "both" },
+  { path: ["m", "ys", "f", "h"], name: "外公", gender: "both" },
+  { path: ["m", "ys", "m", "w"], name: "外婆", gender: "both" },
+  { path: ["m", "ys", "m", "h"], name: "外公", gender: "both" },
+  // 祖辈配偶的子女关系（通用）
+  { path: ["f", "f", "w", "s"], name: "爸爸", gender: "both" },
+  { path: ["f", "f", "w", "d"], name: "姑姑", gender: "both" },
+  { path: ["f", "f", "h", "s"], name: "爸爸", gender: "both" },
+  { path: ["f", "f", "h", "d"], name: "姑姑", gender: "both" },
+  { path: ["f", "m", "w", "s"], name: "爸爸", gender: "both" },
+  { path: ["f", "m", "w", "d"], name: "姑姑", gender: "both" },
+  { path: ["f", "m", "h", "s"], name: "爸爸", gender: "both" },
+  { path: ["f", "m", "h", "d"], name: "姑姑", gender: "both" },
+  { path: ["m", "f", "w", "s"], name: "舅舅", gender: "both" },
+  { path: ["m", "f", "w", "d"], name: "妈妈", gender: "both" },
+  { path: ["m", "f", "h", "s"], name: "舅舅", gender: "both" },
+  { path: ["m", "f", "h", "d"], name: "妈妈", gender: "both" },
+  { path: ["m", "m", "w", "s"], name: "舅舅", gender: "both" },
+  { path: ["m", "m", "w", "d"], name: "妈妈", gender: "both" },
+  { path: ["m", "m", "h", "s"], name: "舅舅", gender: "both" },
+  { path: ["m", "m", "h", "d"], name: "妈妈", gender: "both" },
   // 曾祖辈关系（通用）
   { path: ["f", "f", "f"], name: "曾祖父", gender: "both" },
   { path: ["f", "f", "m"], name: "曾祖母", gender: "both" },
@@ -99,9 +180,839 @@ const relationshipMappings = [
   { path: ["m", "m", "m"], name: "外曾外祖母", gender: "both" },
   // 孙辈的子女（通用）
   { path: ["s", "s"], name: "孙子", gender: "both" },
-  { path: ["s", "d"], name: "孙女", gender: "both" },
-  { path: ["d", "s"], name: "外孙", gender: "both" },
-  { path: ["d", "d"], name: "外孙女", gender: "both" },
+  // 以下为自动补充的缺失关系（已修正）
+  // 自动同步自 missing-relations.txt，共 830 条新条目（去重后）
+  { path: ["d", "d", "h"], name: "外孙女婿", gender: "both" },
+  { path: ["d", "d", "ob"], name: "女儿的女儿的哥哥", gender: "both" },
+  { path: ["d", "d", "os"], name: "女儿的女儿的姐姐", gender: "both" },
+  { path: ["d", "d", "w"], name: "外孙女的老婆", gender: "both" },
+  { path: ["d", "d", "yb"], name: "女儿的女儿的弟弟", gender: "both" },
+  { path: ["d", "d", "ys"], name: "女儿的女儿的妹妹", gender: "both" },
+  { path: ["d", "f", "h"], name: "女儿的爸爸的老公", gender: "both" },
+  { path: ["d", "h", "d"], name: "女儿的老公的女儿", gender: "both" },
+  { path: ["d", "h", "f"], name: "女儿的老公的爸爸", gender: "both" },
+  { path: ["d", "h", "h"], name: "女儿的老公的老公", gender: "both" },
+  { path: ["d", "h", "m"], name: "女儿的老公的妈妈", gender: "both" },
+  { path: ["d", "h", "ob"], name: "女儿的老公的哥哥", gender: "both" },
+  { path: ["d", "h", "os"], name: "女儿的老公的姐姐", gender: "both" },
+  { path: ["d", "h", "s"], name: "女儿的老公的儿子", gender: "both" },
+  { path: ["d", "h", "yb"], name: "女儿的老公的弟弟", gender: "both" },
+  { path: ["d", "h", "ys"], name: "女儿的老公的妹妹", gender: "both" },
+  { path: ["d", "m", "h"], name: "女儿的妈妈的老公", gender: "both" },
+  { path: ["d", "ob", "d"], name: "女儿的哥哥的女儿", gender: "both" },
+  { path: ["d", "ob", "f"], name: "女儿的哥哥的爸爸", gender: "both" },
+  { path: ["d", "ob", "h"], name: "女儿的哥哥的老公", gender: "both" },
+  { path: ["d", "ob", "m"], name: "女儿的哥哥的妈妈", gender: "both" },
+  { path: ["d", "ob", "ob"], name: "女儿的哥哥的哥哥", gender: "both" },
+  { path: ["d", "ob", "os"], name: "女儿的哥哥的姐姐", gender: "both" },
+  { path: ["d", "ob", "s"], name: "女儿的哥哥的儿子", gender: "both" },
+  { path: ["d", "ob", "w"], name: "女儿的哥哥的老婆", gender: "both" },
+  { path: ["d", "ob", "yb"], name: "女儿的哥哥的弟弟", gender: "both" },
+  { path: ["d", "ob", "ys"], name: "女儿的哥哥的妹妹", gender: "both" },
+  { path: ["d", "os", "d"], name: "女儿的姐姐的女儿", gender: "both" },
+  { path: ["d", "os", "f"], name: "女儿的姐姐的爸爸", gender: "both" },
+  { path: ["d", "os", "h"], name: "女儿的姐姐的老公", gender: "both" },
+  { path: ["d", "os", "m"], name: "女儿的姐姐的妈妈", gender: "both" },
+  { path: ["d", "os", "ob"], name: "女儿的姐姐的哥哥", gender: "both" },
+  { path: ["d", "os", "os"], name: "女儿的姐姐的姐姐", gender: "both" },
+  { path: ["d", "os", "s"], name: "女儿的姐姐的儿子", gender: "both" },
+  { path: ["d", "os", "w"], name: "女儿的姐姐的老婆", gender: "both" },
+  { path: ["d", "os", "yb"], name: "女儿的姐姐的弟弟", gender: "both" },
+  { path: ["d", "os", "ys"], name: "女儿的姐姐的妹妹", gender: "both" },
+  { path: ["d", "s", "h"], name: "外孙子的老公", gender: "both" },
+  { path: ["d", "s", "ob"], name: "女儿的儿子的哥哥", gender: "both" },
+  { path: ["d", "s", "os"], name: "女儿的儿子的姐姐", gender: "both" },
+  { path: ["d", "s", "w"], name: "外孙子的老婆", gender: "both" },
+  { path: ["d", "s", "yb"], name: "女儿的儿子的弟弟", gender: "both" },
+  { path: ["d", "s", "ys"], name: "女儿的儿子的妹妹", gender: "both" },
+  { path: ["d", "w", "d"], name: "女儿的老婆的女儿", gender: "both" },
+  { path: ["d", "w", "f"], name: "女儿的老婆的爸爸", gender: "both" },
+  { path: ["d", "w", "m"], name: "女儿的老婆的妈妈", gender: "both" },
+  { path: ["d", "w", "ob"], name: "女儿的老婆的哥哥", gender: "both" },
+  { path: ["d", "w", "os"], name: "女儿的老婆的姐姐", gender: "both" },
+  { path: ["d", "w", "s"], name: "女儿的老婆的儿子", gender: "both" },
+  { path: ["d", "w", "w"], name: "女儿的老婆的老婆", gender: "both" },
+  { path: ["d", "w", "yb"], name: "女儿的老婆的弟弟", gender: "both" },
+  { path: ["d", "w", "ys"], name: "女儿的老婆的妹妹", gender: "both" },
+  { path: ["d", "yb", "d"], name: "女儿的弟弟的女儿", gender: "both" },
+  { path: ["d", "yb", "f"], name: "女儿的弟弟的爸爸", gender: "both" },
+  { path: ["d", "yb", "h"], name: "女儿的弟弟的老公", gender: "both" },
+  { path: ["d", "yb", "m"], name: "女儿的弟弟的妈妈", gender: "both" },
+  { path: ["d", "yb", "ob"], name: "女儿的弟弟的哥哥", gender: "both" },
+  { path: ["d", "yb", "os"], name: "女儿的弟弟的姐姐", gender: "both" },
+  { path: ["d", "yb", "s"], name: "女儿的弟弟的儿子", gender: "both" },
+  { path: ["d", "yb", "w"], name: "女儿的弟弟的老婆", gender: "both" },
+  { path: ["d", "yb", "yb"], name: "女儿的弟弟的弟弟", gender: "both" },
+  { path: ["d", "yb", "ys"], name: "女儿的弟弟的妹妹", gender: "both" },
+  { path: ["d", "ys", "d"], name: "女儿的妹妹的女儿", gender: "both" },
+  { path: ["d", "ys", "f"], name: "女儿的妹妹的爸爸", gender: "both" },
+  { path: ["d", "ys", "h"], name: "女儿的妹妹的老公", gender: "both" },
+  { path: ["d", "ys", "m"], name: "女儿的妹妹的妈妈", gender: "both" },
+  { path: ["d", "ys", "ob"], name: "女儿的妹妹的哥哥", gender: "both" },
+  { path: ["d", "ys", "os"], name: "女儿的妹妹的姐姐", gender: "both" },
+  { path: ["d", "ys", "s"], name: "女儿的妹妹的儿子", gender: "both" },
+  { path: ["d", "ys", "w"], name: "女儿的妹妹的老婆", gender: "both" },
+  { path: ["d", "ys", "yb"], name: "女儿的妹妹的弟弟", gender: "both" },
+  { path: ["d", "ys", "ys"], name: "女儿的妹妹的妹妹", gender: "both" },
+  { path: ["f", "d", "d"], name: "爸爸的女儿的女儿", gender: "both" },
+  { path: ["f", "d", "h"], name: "爸爸的女儿的老公", gender: "both" },
+  { path: ["f", "d", "ob"], name: "爸爸的女儿的哥哥", gender: "both" },
+  { path: ["f", "d", "os"], name: "爸爸的女儿的姐姐", gender: "both" },
+  { path: ["f", "d", "s"], name: "爸爸的女儿的儿子", gender: "both" },
+  { path: ["f", "d", "w"], name: "爸爸的女儿的老婆", gender: "both" },
+  { path: ["f", "d", "yb"], name: "爸爸的女儿的弟弟", gender: "both" },
+  { path: ["f", "d", "ys"], name: "爸爸的女儿的妹妹", gender: "both" },
+  { path: ["f", "f", "d"], name: "爸爸的爸爸的女儿", gender: "both" },
+  { path: ["f", "f", "s"], name: "爸爸的爸爸的儿子", gender: "both" },
+  { path: ["f", "f", "yb"], name: "爸爸的爸爸的弟弟", gender: "both" },
+  { path: ["f", "f", "ys"], name: "爸爸的爸爸的妹妹", gender: "both" },
+  { path: ["f", "h", "d"], name: "爸爸的老公的女儿", gender: "both" },
+  { path: ["f", "h", "f"], name: "爸爸的老公的爸爸", gender: "both" },
+  { path: ["f", "h", "h"], name: "爸爸的老公的老公", gender: "both" },
+  { path: ["f", "h", "m"], name: "爸爸的老公的妈妈", gender: "both" },
+  { path: ["f", "h", "ob"], name: "爸爸的老公的哥哥", gender: "both" },
+  { path: ["f", "h", "os"], name: "爸爸的老公的姐姐", gender: "both" },
+  { path: ["f", "h", "s"], name: "爸爸的老公的儿子", gender: "both" },
+  { path: ["f", "h", "yb"], name: "爸爸的老公的弟弟", gender: "both" },
+  { path: ["f", "h", "ys"], name: "爸爸的老公的妹妹", gender: "both" },
+  { path: ["f", "m", "d"], name: "爸爸的妈妈的女儿", gender: "both" },
+  { path: ["f", "m", "s"], name: "爸爸的妈妈的儿子", gender: "both" },
+  { path: ["f", "m", "yb"], name: "爸爸的妈妈的弟弟", gender: "both" },
+  { path: ["f", "m", "ys"], name: "爸爸的妈妈的妹妹", gender: "both" },
+  { path: ["f", "s", "d"], name: "爸爸的儿子的女儿", gender: "both" },
+  { path: ["f", "s", "h"], name: "爸爸的儿子的老公", gender: "both" },
+  { path: ["f", "s", "ob"], name: "爸爸的儿子的哥哥", gender: "both" },
+  { path: ["f", "s", "os"], name: "爸爸的儿子的姐姐", gender: "both" },
+  { path: ["f", "s", "s"], name: "爸爸的儿子的儿子", gender: "both" },
+  { path: ["f", "s", "w"], name: "爸爸的儿子的老婆", gender: "both" },
+  { path: ["f", "s", "yb"], name: "爸爸的儿子的弟弟", gender: "both" },
+  { path: ["f", "s", "ys"], name: "爸爸的儿子的妹妹", gender: "both" },
+  { path: ["f", "w", "d"], name: "爸爸的老婆的女儿", gender: "both" },
+  { path: ["f", "w", "f"], name: "爸爸的老婆的爸爸", gender: "both" },
+  { path: ["f", "w", "m"], name: "爸爸的老婆的妈妈", gender: "both" },
+  { path: ["f", "w", "ob"], name: "爸爸的老婆的哥哥", gender: "both" },
+  { path: ["f", "w", "os"], name: "爸爸的老婆的姐姐", gender: "both" },
+  { path: ["f", "w", "s"], name: "爸爸的老婆的儿子", gender: "both" },
+  { path: ["f", "w", "w"], name: "爸爸的老婆的老婆", gender: "both" },
+  { path: ["f", "w", "yb"], name: "爸爸的老婆的弟弟", gender: "both" },
+  { path: ["f", "w", "ys"], name: "爸爸的老婆的妹妹", gender: "both" },
+  { path: ["h", "d", "d"], name: "老公的女儿的女儿", gender: "both" },
+  { path: ["h", "d", "f"], name: "老公的女儿的爸爸", gender: "both" },
+  { path: ["h", "d", "h"], name: "老公的女儿的老公", gender: "both" },
+  { path: ["h", "d", "m"], name: "老公的女儿的妈妈", gender: "both" },
+  { path: ["h", "d", "ob"], name: "老公的女儿的哥哥", gender: "both" },
+  { path: ["h", "d", "os"], name: "老公的女儿的姐姐", gender: "both" },
+  { path: ["h", "d", "s"], name: "老公的女儿的儿子", gender: "both" },
+  { path: ["h", "d", "w"], name: "老公的女儿的老婆", gender: "both" },
+  { path: ["h", "d", "yb"], name: "老公的女儿的弟弟", gender: "both" },
+  { path: ["h", "d", "ys"], name: "老公的女儿的妹妹", gender: "both" },
+  { path: ["h", "f", "d"], name: "老公的爸爸的女儿", gender: "both" },
+  { path: ["h", "f", "h"], name: "老公的爸爸的老公", gender: "both" },
+  { path: ["h", "f", "ob"], name: "老公的爸爸的哥哥", gender: "both" },
+  { path: ["h", "f", "os"], name: "老公的爸爸的姐姐", gender: "both" },
+  { path: ["h", "f", "s"], name: "老公的爸爸的儿子", gender: "both" },
+  { path: ["h", "f", "w"], name: "老公的爸爸的老婆", gender: "both" },
+  { path: ["h", "f", "yb"], name: "老公的爸爸的弟弟", gender: "both" },
+  { path: ["h", "f", "ys"], name: "老公的爸爸的妹妹", gender: "both" },
+  { path: ["h", "h", "d"], name: "老公的老公的女儿", gender: "both" },
+  { path: ["h", "h", "f"], name: "老公的老公的爸爸", gender: "both" },
+  { path: ["h", "h", "h"], name: "老公的老公的老公", gender: "both" },
+  { path: ["h", "h", "m"], name: "老公的老公的妈妈", gender: "both" },
+  { path: ["h", "h", "ob"], name: "老公的老公的哥哥", gender: "both" },
+  { path: ["h", "h", "os"], name: "老公的老公的姐姐", gender: "both" },
+  { path: ["h", "h", "s"], name: "老公的老公的儿子", gender: "both" },
+  { path: ["h", "h", "w"], name: "老公的老公的老婆", gender: "both" },
+  { path: ["h", "h", "yb"], name: "老公的老公的弟弟", gender: "both" },
+  { path: ["h", "h", "ys"], name: "老公的老公的妹妹", gender: "both" },
+  { path: ["h", "m", "d"], name: "老公的妈妈的女儿", gender: "both" },
+  { path: ["h", "m", "f"], name: "老公的妈妈的爸爸", gender: "both" },
+  { path: ["h", "m", "h"], name: "老公的妈妈的老公", gender: "both" },
+  { path: ["h", "m", "m"], name: "老公的妈妈的妈妈", gender: "both" },
+  { path: ["h", "m", "ob"], name: "老公的妈妈的哥哥", gender: "both" },
+  { path: ["h", "m", "os"], name: "老公的妈妈的姐姐", gender: "both" },
+  { path: ["h", "m", "s"], name: "老公的妈妈的儿子", gender: "both" },
+  { path: ["h", "m", "w"], name: "老公的妈妈的老婆", gender: "both" },
+  { path: ["h", "m", "yb"], name: "老公的妈妈的弟弟", gender: "both" },
+  { path: ["h", "m", "ys"], name: "老公的妈妈的妹妹", gender: "both" },
+  { path: ["h", "ob", "d"], name: "老公的哥哥的女儿", gender: "both" },
+  { path: ["h", "ob", "f"], name: "老公的哥哥的爸爸", gender: "both" },
+  { path: ["h", "ob", "h"], name: "老公的哥哥的老公", gender: "both" },
+  { path: ["h", "ob", "m"], name: "老公的哥哥的妈妈", gender: "both" },
+  { path: ["h", "ob", "ob"], name: "老公的哥哥的哥哥", gender: "both" },
+  { path: ["h", "ob", "os"], name: "老公的哥哥的姐姐", gender: "both" },
+  { path: ["h", "ob", "s"], name: "老公的哥哥的儿子", gender: "both" },
+  { path: ["h", "ob", "w"], name: "老公的哥哥的老婆", gender: "both" },
+  { path: ["h", "ob", "yb"], name: "老公的哥哥的弟弟", gender: "both" },
+  { path: ["h", "ob", "ys"], name: "老公的哥哥的妹妹", gender: "both" },
+  { path: ["h", "os", "d"], name: "老公的姐姐的女儿", gender: "both" },
+  { path: ["h", "os", "f"], name: "老公的姐姐的爸爸", gender: "both" },
+  { path: ["h", "os", "h"], name: "老公的姐姐的老公", gender: "both" },
+  { path: ["h", "os", "m"], name: "老公的姐姐的妈妈", gender: "both" },
+  { path: ["h", "os", "ob"], name: "老公的姐姐的哥哥", gender: "both" },
+  { path: ["h", "os", "os"], name: "老公的姐姐的姐姐", gender: "both" },
+  { path: ["h", "os", "s"], name: "老公的姐姐的儿子", gender: "both" },
+  { path: ["h", "os", "w"], name: "老公的姐姐的老婆", gender: "both" },
+  { path: ["h", "os", "yb"], name: "老公的姐姐的弟弟", gender: "both" },
+  { path: ["h", "os", "ys"], name: "老公的姐姐的妹妹", gender: "both" },
+  { path: ["h", "s", "d"], name: "老公的儿子的女儿", gender: "both" },
+  { path: ["h", "s", "f"], name: "老公的儿子的爸爸", gender: "both" },
+  { path: ["h", "s", "h"], name: "老公的儿子的老公", gender: "both" },
+  { path: ["h", "s", "m"], name: "老公的儿子的妈妈", gender: "both" },
+  { path: ["h", "s", "ob"], name: "老公的儿子的哥哥", gender: "both" },
+  { path: ["h", "s", "os"], name: "老公的儿子的姐姐", gender: "both" },
+  { path: ["h", "s", "s"], name: "老公的儿子的儿子", gender: "both" },
+  { path: ["h", "s", "w"], name: "老公的儿子的老婆", gender: "both" },
+  { path: ["h", "s", "yb"], name: "老公的儿子的弟弟", gender: "both" },
+  { path: ["h", "s", "ys"], name: "老公的儿子的妹妹", gender: "both" },
+  { path: ["h", "w", "h"], name: "老公的老婆的老公", gender: "both" },
+  { path: ["h", "yb", "d"], name: "老公的弟弟的女儿", gender: "both" },
+  { path: ["h", "yb", "f"], name: "老公的弟弟的爸爸", gender: "both" },
+  { path: ["h", "yb", "h"], name: "老公的弟弟的老公", gender: "both" },
+  { path: ["h", "yb", "m"], name: "老公的弟弟的妈妈", gender: "both" },
+  { path: ["h", "yb", "ob"], name: "老公的弟弟的哥哥", gender: "both" },
+  { path: ["h", "yb", "os"], name: "老公的弟弟的姐姐", gender: "both" },
+  { path: ["h", "yb", "s"], name: "老公的弟弟的儿子", gender: "both" },
+  { path: ["h", "yb", "w"], name: "老公的弟弟的老婆", gender: "both" },
+  { path: ["h", "yb", "yb"], name: "老公的弟弟的弟弟", gender: "both" },
+  { path: ["h", "yb", "ys"], name: "老公的弟弟的妹妹", gender: "both" },
+  { path: ["h", "ys", "d"], name: "老公的妹妹的女儿", gender: "both" },
+  { path: ["h", "ys", "f"], name: "老公的妹妹的爸爸", gender: "both" },
+  { path: ["h", "ys", "h"], name: "老公的妹妹的老公", gender: "both" },
+  { path: ["h", "ys", "m"], name: "老公的妹妹的妈妈", gender: "both" },
+  { path: ["h", "ys", "ob"], name: "老公的妹妹的哥哥", gender: "both" },
+  { path: ["h", "ys", "os"], name: "老公的妹妹的姐姐", gender: "both" },
+  { path: ["h", "ys", "s"], name: "老公的妹妹的儿子", gender: "both" },
+  { path: ["h", "ys", "w"], name: "老公的妹妹的老婆", gender: "both" },
+  { path: ["h", "ys", "yb"], name: "老公的妹妹的弟弟", gender: "both" },
+  { path: ["h", "ys", "ys"], name: "老公的妹妹的妹妹", gender: "both" },
+  { path: ["m", "d", "d"], name: "妈妈的女儿的女儿", gender: "both" },
+  { path: ["m", "d", "h"], name: "妈妈的女儿的老公", gender: "both" },
+  { path: ["m", "d", "ob"], name: "妈妈的女儿的哥哥", gender: "both" },
+  { path: ["m", "d", "os"], name: "妈妈的女儿的姐姐", gender: "both" },
+  { path: ["m", "d", "s"], name: "妈妈的女儿的儿子", gender: "both" },
+  { path: ["m", "d", "w"], name: "妈妈的女儿的老婆", gender: "both" },
+  { path: ["m", "d", "yb"], name: "妈妈的女儿的弟弟", gender: "both" },
+  { path: ["m", "d", "ys"], name: "妈妈的女儿的妹妹", gender: "both" },
+  { path: ["m", "f", "d"], name: "妈妈的爸爸的女儿", gender: "both" },
+  { path: ["m", "f", "s"], name: "妈妈的爸爸的儿子", gender: "both" },
+  { path: ["m", "f", "yb"], name: "妈妈的爸爸的弟弟", gender: "both" },
+  { path: ["m", "f", "ys"], name: "妈妈的爸爸的妹妹", gender: "both" },
+  { path: ["m", "h", "d"], name: "妈妈的老公的女儿", gender: "both" },
+  { path: ["m", "h", "f"], name: "妈妈的老公的爸爸", gender: "both" },
+  { path: ["m", "h", "h"], name: "妈妈的老公的老公", gender: "both" },
+  { path: ["m", "h", "m"], name: "妈妈的老公的妈妈", gender: "both" },
+  { path: ["m", "h", "ob"], name: "妈妈的老公的哥哥", gender: "both" },
+  { path: ["m", "h", "os"], name: "妈妈的老公的姐姐", gender: "both" },
+  { path: ["m", "h", "s"], name: "妈妈的老公的儿子", gender: "both" },
+  { path: ["m", "h", "yb"], name: "妈妈的老公的弟弟", gender: "both" },
+  { path: ["m", "h", "ys"], name: "妈妈的老公的妹妹", gender: "both" },
+  { path: ["m", "m", "d"], name: "妈妈的妈妈的女儿", gender: "both" },
+  { path: ["m", "m", "s"], name: "妈妈的妈妈的儿子", gender: "both" },
+  { path: ["m", "m", "yb"], name: "妈妈的妈妈的弟弟", gender: "both" },
+  { path: ["m", "m", "ys"], name: "妈妈的妈妈的妹妹", gender: "both" },
+  { path: ["m", "s", "d"], name: "妈妈的儿子的女儿", gender: "both" },
+  { path: ["m", "s", "h"], name: "妈妈的儿子的老公", gender: "both" },
+  { path: ["m", "s", "ob"], name: "妈妈的儿子的哥哥", gender: "both" },
+  { path: ["m", "s", "os"], name: "妈妈的儿子的姐姐", gender: "both" },
+  { path: ["m", "s", "s"], name: "妈妈的儿子的儿子", gender: "both" },
+  { path: ["m", "s", "w"], name: "妈妈的儿子的老婆", gender: "both" },
+  { path: ["m", "s", "yb"], name: "妈妈的儿子的弟弟", gender: "both" },
+  { path: ["m", "s", "ys"], name: "妈妈的儿子的妹妹", gender: "both" },
+  { path: ["m", "w", "d"], name: "妈妈的老婆的女儿", gender: "both" },
+  { path: ["m", "w", "f"], name: "妈妈的老婆的爸爸", gender: "both" },
+  { path: ["m", "w", "m"], name: "妈妈的老婆的妈妈", gender: "both" },
+  { path: ["m", "w", "ob"], name: "妈妈的老婆的哥哥", gender: "both" },
+  { path: ["m", "w", "os"], name: "妈妈的老婆的姐姐", gender: "both" },
+  { path: ["m", "w", "s"], name: "妈妈的老婆的儿子", gender: "both" },
+  { path: ["m", "w", "w"], name: "妈妈的老婆的老婆", gender: "both" },
+  { path: ["m", "w", "yb"], name: "妈妈的老婆的弟弟", gender: "both" },
+  { path: ["m", "w", "ys"], name: "妈妈的老婆的妹妹", gender: "both" },
+  { path: ["ob", "d", "d"], name: "哥哥的女儿的女儿", gender: "both" },
+  { path: ["ob", "d", "h"], name: "哥哥的女儿的老公", gender: "both" },
+  { path: ["ob", "d", "ob"], name: "哥哥的女儿的哥哥", gender: "both" },
+  { path: ["ob", "d", "os"], name: "哥哥的女儿的姐姐", gender: "both" },
+  { path: ["ob", "d", "s"], name: "哥哥的女儿的儿子", gender: "both" },
+  { path: ["ob", "d", "w"], name: "哥哥的女儿的老婆", gender: "both" },
+  { path: ["ob", "d", "yb"], name: "哥哥的女儿的弟弟", gender: "both" },
+  { path: ["ob", "d", "ys"], name: "哥哥的女儿的妹妹", gender: "both" },
+  { path: ["ob", "f", "d"], name: "哥哥的爸爸的女儿", gender: "both" },
+  { path: ["ob", "f", "f"], name: "哥哥的爸爸的爸爸", gender: "both" },
+  { path: ["ob", "f", "h"], name: "哥哥的爸爸的老公", gender: "both" },
+  { path: ["ob", "f", "m"], name: "哥哥的爸爸的妈妈", gender: "both" },
+  { path: ["ob", "f", "ob"], name: "哥哥的爸爸的哥哥", gender: "both" },
+  { path: ["ob", "f", "os"], name: "哥哥的爸爸的姐姐", gender: "both" },
+  { path: ["ob", "f", "s"], name: "哥哥的爸爸的儿子", gender: "both" },
+  { path: ["ob", "f", "w"], name: "哥哥的爸爸的老婆", gender: "both" },
+  { path: ["ob", "f", "yb"], name: "哥哥的爸爸的弟弟", gender: "both" },
+  { path: ["ob", "f", "ys"], name: "哥哥的爸爸的妹妹", gender: "both" },
+  { path: ["ob", "h", "f"], name: "哥哥的老公的爸爸", gender: "both" },
+  { path: ["ob", "h", "h"], name: "哥哥的老公的老公", gender: "both" },
+  { path: ["ob", "h", "m"], name: "哥哥的老公的妈妈", gender: "both" },
+  { path: ["ob", "h", "ob"], name: "哥哥的老公的哥哥", gender: "both" },
+  { path: ["ob", "h", "os"], name: "哥哥的老公的姐姐", gender: "both" },
+  { path: ["ob", "h", "yb"], name: "哥哥的老公的弟弟", gender: "both" },
+  { path: ["ob", "h", "ys"], name: "哥哥的老公的妹妹", gender: "both" },
+  { path: ["ob", "m", "d"], name: "哥哥的妈妈的女儿", gender: "both" },
+  { path: ["ob", "m", "f"], name: "哥哥的妈妈的爸爸", gender: "both" },
+  { path: ["ob", "m", "h"], name: "哥哥的妈妈的老公", gender: "both" },
+  { path: ["ob", "m", "m"], name: "哥哥的妈妈的妈妈", gender: "both" },
+  { path: ["ob", "m", "ob"], name: "哥哥的妈妈的哥哥", gender: "both" },
+  { path: ["ob", "m", "os"], name: "哥哥的妈妈的姐姐", gender: "both" },
+  { path: ["ob", "m", "s"], name: "哥哥的妈妈的儿子", gender: "both" },
+  { path: ["ob", "m", "w"], name: "哥哥的妈妈的老婆", gender: "both" },
+  { path: ["ob", "m", "yb"], name: "哥哥的妈妈的弟弟", gender: "both" },
+  { path: ["ob", "m", "ys"], name: "哥哥的妈妈的妹妹", gender: "both" },
+  { path: ["ob", "ob", "f"], name: "哥哥的哥哥的爸爸", gender: "both" },
+  { path: ["ob", "ob", "h"], name: "哥哥的哥哥的老公", gender: "both" },
+  { path: ["ob", "ob", "m"], name: "哥哥的哥哥的妈妈", gender: "both" },
+  { path: ["ob", "os", "d"], name: "哥哥的姐姐的女儿", gender: "both" },
+  { path: ["ob", "os", "f"], name: "哥哥的姐姐的爸爸", gender: "both" },
+  { path: ["ob", "os", "h"], name: "哥哥的姐姐的老公", gender: "both" },
+  { path: ["ob", "os", "m"], name: "哥哥的姐姐的妈妈", gender: "both" },
+  { path: ["ob", "os", "ob"], name: "哥哥的姐姐的哥哥", gender: "both" },
+  { path: ["ob", "os", "s"], name: "哥哥的姐姐的儿子", gender: "both" },
+  { path: ["ob", "os", "w"], name: "哥哥的姐姐的老婆", gender: "both" },
+  { path: ["ob", "os", "yb"], name: "哥哥的姐姐的弟弟", gender: "both" },
+  { path: ["ob", "os", "ys"], name: "哥哥的姐姐的妹妹", gender: "both" },
+  { path: ["ob", "s", "h"], name: "哥哥的儿子的老公", gender: "both" },
+  { path: ["ob", "s", "ob"], name: "哥哥的儿子的哥哥", gender: "both" },
+  { path: ["ob", "s", "os"], name: "哥哥的儿子的姐姐", gender: "both" },
+  { path: ["ob", "s", "w"], name: "哥哥的儿子的老婆", gender: "both" },
+  { path: ["ob", "s", "yb"], name: "哥哥的儿子的弟弟", gender: "both" },
+  { path: ["ob", "s", "ys"], name: "哥哥的儿子的妹妹", gender: "both" },
+  { path: ["ob", "w", "f"], name: "哥哥的老婆的爸爸", gender: "both" },
+  { path: ["ob", "w", "m"], name: "哥哥的老婆的妈妈", gender: "both" },
+  { path: ["ob", "w", "ob"], name: "哥哥的老婆的哥哥", gender: "both" },
+  { path: ["ob", "w", "os"], name: "哥哥的老婆的姐姐", gender: "both" },
+  { path: ["ob", "w", "w"], name: "哥哥的老婆的老婆", gender: "both" },
+  { path: ["ob", "w", "yb"], name: "哥哥的老婆的弟弟", gender: "both" },
+  { path: ["ob", "w", "ys"], name: "哥哥的老婆的妹妹", gender: "both" },
+  { path: ["ob", "yb", "d"], name: "哥哥的弟弟的女儿", gender: "both" },
+  { path: ["ob", "yb", "f"], name: "哥哥的弟弟的爸爸", gender: "both" },
+  { path: ["ob", "yb", "h"], name: "哥哥的弟弟的老公", gender: "both" },
+  { path: ["ob", "yb", "m"], name: "哥哥的弟弟的妈妈", gender: "both" },
+  { path: ["ob", "yb", "ob"], name: "哥哥的弟弟的哥哥", gender: "both" },
+  { path: ["ob", "yb", "os"], name: "哥哥的弟弟的姐姐", gender: "both" },
+  { path: ["ob", "yb", "s"], name: "哥哥的弟弟的儿子", gender: "both" },
+  { path: ["ob", "yb", "w"], name: "哥哥的弟弟的老婆", gender: "both" },
+  { path: ["ob", "yb", "ys"], name: "哥哥的弟弟的妹妹", gender: "both" },
+  { path: ["ob", "ys", "d"], name: "哥哥的妹妹的女儿", gender: "both" },
+  { path: ["ob", "ys", "f"], name: "哥哥的妹妹的爸爸", gender: "both" },
+  { path: ["ob", "ys", "h"], name: "哥哥的妹妹的老公", gender: "both" },
+  { path: ["ob", "ys", "m"], name: "哥哥的妹妹的妈妈", gender: "both" },
+  { path: ["ob", "ys", "ob"], name: "哥哥的妹妹的哥哥", gender: "both" },
+  { path: ["ob", "ys", "os"], name: "哥哥的妹妹的姐姐", gender: "both" },
+  { path: ["ob", "ys", "s"], name: "哥哥的妹妹的儿子", gender: "both" },
+  { path: ["ob", "ys", "w"], name: "哥哥的妹妹的老婆", gender: "both" },
+  { path: ["ob", "ys", "yb"], name: "哥哥的妹妹的弟弟", gender: "both" },
+  { path: ["os", "d", "d"], name: "姐姐的女儿的女儿", gender: "both" },
+  { path: ["os", "d", "h"], name: "姐姐的女儿的老公", gender: "both" },
+  { path: ["os", "d", "ob"], name: "姐姐的女儿的哥哥", gender: "both" },
+  { path: ["os", "d", "os"], name: "姐姐的女儿的姐姐", gender: "both" },
+  { path: ["os", "d", "s"], name: "姐姐的女儿的儿子", gender: "both" },
+  { path: ["os", "d", "w"], name: "姐姐的女儿的老婆", gender: "both" },
+  { path: ["os", "d", "yb"], name: "姐姐的女儿的弟弟", gender: "both" },
+  { path: ["os", "d", "ys"], name: "姐姐的女儿的妹妹", gender: "both" },
+  { path: ["os", "f", "d"], name: "姐姐的爸爸的女儿", gender: "both" },
+  { path: ["os", "f", "f"], name: "姐姐的爸爸的爸爸", gender: "both" },
+  { path: ["os", "f", "h"], name: "姐姐的爸爸的老公", gender: "both" },
+  { path: ["os", "f", "m"], name: "姐姐的爸爸的妈妈", gender: "both" },
+  { path: ["os", "f", "ob"], name: "姐姐的爸爸的哥哥", gender: "both" },
+  { path: ["os", "f", "os"], name: "姐姐的爸爸的姐姐", gender: "both" },
+  { path: ["os", "f", "s"], name: "姐姐的爸爸的儿子", gender: "both" },
+  { path: ["os", "f", "w"], name: "姐姐的爸爸的老婆", gender: "both" },
+  { path: ["os", "f", "yb"], name: "姐姐的爸爸的弟弟", gender: "both" },
+  { path: ["os", "f", "ys"], name: "姐姐的爸爸的妹妹", gender: "both" },
+  { path: ["os", "h", "f"], name: "姐姐的老公的爸爸", gender: "both" },
+  { path: ["os", "h", "h"], name: "姐姐的老公的老公", gender: "both" },
+  { path: ["os", "h", "m"], name: "姐姐的老公的妈妈", gender: "both" },
+  { path: ["os", "h", "ob"], name: "姐姐的老公的哥哥", gender: "both" },
+  { path: ["os", "h", "os"], name: "姐姐的老公的姐姐", gender: "both" },
+  { path: ["os", "h", "yb"], name: "姐姐的老公的弟弟", gender: "both" },
+  { path: ["os", "h", "ys"], name: "姐姐的老公的妹妹", gender: "both" },
+  { path: ["os", "m", "d"], name: "姐姐的妈妈的女儿", gender: "both" },
+  { path: ["os", "m", "f"], name: "姐姐的妈妈的爸爸", gender: "both" },
+  { path: ["os", "m", "h"], name: "姐姐的妈妈的老公", gender: "both" },
+  { path: ["os", "m", "m"], name: "姐姐的妈妈的妈妈", gender: "both" },
+  { path: ["os", "m", "ob"], name: "姐姐的妈妈的哥哥", gender: "both" },
+  { path: ["os", "m", "os"], name: "姐姐的妈妈的姐姐", gender: "both" },
+  { path: ["os", "m", "s"], name: "姐姐的妈妈的儿子", gender: "both" },
+  { path: ["os", "m", "w"], name: "姐姐的妈妈的老婆", gender: "both" },
+  { path: ["os", "m", "yb"], name: "姐姐的妈妈的弟弟", gender: "both" },
+  { path: ["os", "m", "ys"], name: "姐姐的妈妈的妹妹", gender: "both" },
+  { path: ["os", "ob", "d"], name: "姐姐的哥哥的女儿", gender: "both" },
+  { path: ["os", "ob", "f"], name: "姐姐的哥哥的爸爸", gender: "both" },
+  { path: ["os", "ob", "h"], name: "姐姐的哥哥的老公", gender: "both" },
+  { path: ["os", "ob", "m"], name: "姐姐的哥哥的妈妈", gender: "both" },
+  { path: ["os", "ob", "os"], name: "姐姐的哥哥的姐姐", gender: "both" },
+  { path: ["os", "ob", "s"], name: "姐姐的哥哥的儿子", gender: "both" },
+  { path: ["os", "ob", "w"], name: "姐姐的哥哥的老婆", gender: "both" },
+  { path: ["os", "ob", "yb"], name: "姐姐的哥哥的弟弟", gender: "both" },
+  { path: ["os", "ob", "ys"], name: "姐姐的哥哥的妹妹", gender: "both" },
+  { path: ["os", "os", "f"], name: "姐姐的姐姐的爸爸", gender: "both" },
+  { path: ["os", "os", "m"], name: "姐姐的姐姐的妈妈", gender: "both" },
+  { path: ["os", "os", "w"], name: "姐姐的姐姐的老婆", gender: "both" },
+  { path: ["os", "s", "h"], name: "姐姐的儿子的老公", gender: "both" },
+  { path: ["os", "s", "ob"], name: "姐姐的儿子的哥哥", gender: "both" },
+  { path: ["os", "s", "os"], name: "姐姐的儿子的姐姐", gender: "both" },
+  { path: ["os", "s", "w"], name: "姐姐的儿子的老婆", gender: "both" },
+  { path: ["os", "s", "yb"], name: "姐姐的儿子的弟弟", gender: "both" },
+  { path: ["os", "s", "ys"], name: "姐姐的儿子的妹妹", gender: "both" },
+  { path: ["os", "w", "f"], name: "姐姐的老婆的爸爸", gender: "both" },
+  { path: ["os", "w", "m"], name: "姐姐的老婆的妈妈", gender: "both" },
+  { path: ["os", "w", "ob"], name: "姐姐的老婆的哥哥", gender: "both" },
+  { path: ["os", "w", "os"], name: "姐姐的老婆的姐姐", gender: "both" },
+  { path: ["os", "w", "w"], name: "姐姐的老婆的老婆", gender: "both" },
+  { path: ["os", "w", "yb"], name: "姐姐的老婆的弟弟", gender: "both" },
+  { path: ["os", "w", "ys"], name: "姐姐的老婆的妹妹", gender: "both" },
+  { path: ["os", "yb", "d"], name: "姐姐的弟弟的女儿", gender: "both" },
+  { path: ["os", "yb", "f"], name: "姐姐的弟弟的爸爸", gender: "both" },
+  { path: ["os", "yb", "h"], name: "姐姐的弟弟的老公", gender: "both" },
+  { path: ["os", "yb", "m"], name: "姐姐的弟弟的妈妈", gender: "both" },
+  { path: ["os", "yb", "ob"], name: "姐姐的弟弟的哥哥", gender: "both" },
+  { path: ["os", "yb", "os"], name: "姐姐的弟弟的姐姐", gender: "both" },
+  { path: ["os", "yb", "s"], name: "姐姐的弟弟的儿子", gender: "both" },
+  { path: ["os", "yb", "w"], name: "姐姐的弟弟的老婆", gender: "both" },
+  { path: ["os", "yb", "ys"], name: "姐姐的弟弟的妹妹", gender: "both" },
+  { path: ["os", "ys", "d"], name: "姐姐的妹妹的女儿", gender: "both" },
+  { path: ["os", "ys", "f"], name: "姐姐的妹妹的爸爸", gender: "both" },
+  { path: ["os", "ys", "h"], name: "姐姐的妹妹的老公", gender: "both" },
+  { path: ["os", "ys", "m"], name: "姐姐的妹妹的妈妈", gender: "both" },
+  { path: ["os", "ys", "ob"], name: "姐姐的妹妹的哥哥", gender: "both" },
+  { path: ["os", "ys", "os"], name: "姐姐的妹妹的姐姐", gender: "both" },
+  { path: ["os", "ys", "s"], name: "姐姐的妹妹的儿子", gender: "both" },
+  { path: ["os", "ys", "w"], name: "姐姐的妹妹的老婆", gender: "both" },
+  { path: ["os", "ys", "yb"], name: "姐姐的妹妹的弟弟", gender: "both" },
+  { path: ["s", "d", "h"], name: "孙女婿", gender: "both" },
+  { path: ["s", "d", "ob"], name: "儿子的女儿的哥哥", gender: "both" },
+  { path: ["s", "d", "os"], name: "儿子的女儿的姐姐", gender: "both" },
+  { path: ["s", "d", "w"], name: "孙女的老婆", gender: "both" },
+  { path: ["s", "d", "yb"], name: "儿子的女儿的弟弟", gender: "both" },
+  { path: ["s", "d", "ys"], name: "儿子的女儿的妹妹", gender: "both" },
+  { path: ["s", "f", "h"], name: "儿子的爸爸的老公", gender: "both" },
+  { path: ["s", "h", "d"], name: "儿子的老公的女儿", gender: "both" },
+  { path: ["s", "h", "f"], name: "儿子的老公的爸爸", gender: "both" },
+  { path: ["s", "h", "h"], name: "儿子的老公的老公", gender: "both" },
+  { path: ["s", "h", "m"], name: "儿子的老公的妈妈", gender: "both" },
+  { path: ["s", "h", "ob"], name: "儿子的老公的哥哥", gender: "both" },
+  { path: ["s", "h", "os"], name: "儿子的老公的姐姐", gender: "both" },
+  { path: ["s", "h", "s"], name: "儿子的老公的儿子", gender: "both" },
+  { path: ["s", "h", "yb"], name: "儿子的老公的弟弟", gender: "both" },
+  { path: ["s", "h", "ys"], name: "儿子的老公的妹妹", gender: "both" },
+  { path: ["s", "m", "h"], name: "儿子的妈妈的老公", gender: "both" },
+  { path: ["s", "ob", "d"], name: "儿子的哥哥的女儿", gender: "both" },
+  { path: ["s", "ob", "f"], name: "儿子的哥哥的爸爸", gender: "both" },
+  { path: ["s", "ob", "h"], name: "儿子的哥哥的老公", gender: "both" },
+  { path: ["s", "ob", "m"], name: "儿子的哥哥的妈妈", gender: "both" },
+  { path: ["s", "ob", "ob"], name: "儿子的哥哥的哥哥", gender: "both" },
+  { path: ["s", "ob", "os"], name: "儿子的哥哥的姐姐", gender: "both" },
+  { path: ["s", "ob", "s"], name: "儿子的哥哥的儿子", gender: "both" },
+  { path: ["s", "ob", "w"], name: "儿子的哥哥的老婆", gender: "both" },
+  { path: ["s", "ob", "yb"], name: "儿子的哥哥的弟弟", gender: "both" },
+  { path: ["s", "ob", "ys"], name: "儿子的哥哥的妹妹", gender: "both" },
+  { path: ["s", "os", "d"], name: "儿子的姐姐的女儿", gender: "both" },
+  { path: ["s", "os", "f"], name: "儿子的姐姐的爸爸", gender: "both" },
+  { path: ["s", "os", "h"], name: "儿子的姐姐的老公", gender: "both" },
+  { path: ["s", "os", "m"], name: "儿子的姐姐的妈妈", gender: "both" },
+  { path: ["s", "os", "ob"], name: "儿子的姐姐的哥哥", gender: "both" },
+  { path: ["s", "os", "os"], name: "儿子的姐姐的姐姐", gender: "both" },
+  { path: ["s", "os", "s"], name: "儿子的姐姐的儿子", gender: "both" },
+  { path: ["s", "os", "w"], name: "儿子的姐姐的老婆", gender: "both" },
+  { path: ["s", "os", "yb"], name: "儿子的姐姐的弟弟", gender: "both" },
+  { path: ["s", "os", "ys"], name: "儿子的姐姐的妹妹", gender: "both" },
+  { path: ["s", "s", "h"], name: "孙子的老公", gender: "both" },
+  { path: ["s", "s", "ob"], name: "儿子的儿子的哥哥", gender: "both" },
+  { path: ["s", "s", "os"], name: "儿子的儿子的姐姐", gender: "both" },
+  { path: ["s", "s", "w"], name: "孙子的老婆", gender: "both" },
+  { path: ["s", "s", "yb"], name: "儿子的儿子的弟弟", gender: "both" },
+  { path: ["s", "s", "ys"], name: "儿子的儿子的妹妹", gender: "both" },
+  { path: ["s", "w", "d"], name: "儿子的老婆的女儿", gender: "both" },
+  { path: ["s", "w", "f"], name: "儿子的老婆的爸爸", gender: "both" },
+  { path: ["s", "w", "m"], name: "儿子的老婆的妈妈", gender: "both" },
+  { path: ["s", "w", "ob"], name: "儿子的老婆的哥哥", gender: "both" },
+  { path: ["s", "w", "os"], name: "儿子的老婆的姐姐", gender: "both" },
+  { path: ["s", "w", "s"], name: "儿子的老婆的儿子", gender: "both" },
+  { path: ["s", "w", "w"], name: "儿子的老婆的老婆", gender: "both" },
+  { path: ["s", "w", "yb"], name: "儿子的老婆的弟弟", gender: "both" },
+  { path: ["s", "w", "ys"], name: "儿子的老婆的妹妹", gender: "both" },
+  { path: ["s", "yb", "d"], name: "儿子的弟弟的女儿", gender: "both" },
+  { path: ["s", "yb", "f"], name: "儿子的弟弟的爸爸", gender: "both" },
+  { path: ["s", "yb", "h"], name: "儿子的弟弟的老公", gender: "both" },
+  { path: ["s", "yb", "m"], name: "儿子的弟弟的妈妈", gender: "both" },
+  { path: ["s", "yb", "ob"], name: "儿子的弟弟的哥哥", gender: "both" },
+  { path: ["s", "yb", "os"], name: "儿子的弟弟的姐姐", gender: "both" },
+  { path: ["s", "yb", "s"], name: "儿子的弟弟的儿子", gender: "both" },
+  { path: ["s", "yb", "w"], name: "儿子的弟弟的老婆", gender: "both" },
+  { path: ["s", "yb", "yb"], name: "儿子的弟弟的弟弟", gender: "both" },
+  { path: ["s", "yb", "ys"], name: "儿子的弟弟的妹妹", gender: "both" },
+  { path: ["s", "ys", "d"], name: "儿子的妹妹的女儿", gender: "both" },
+  { path: ["s", "ys", "f"], name: "儿子的妹妹的爸爸", gender: "both" },
+  { path: ["s", "ys", "h"], name: "儿子的妹妹的老公", gender: "both" },
+  { path: ["s", "ys", "m"], name: "儿子的妹妹的妈妈", gender: "both" },
+  { path: ["s", "ys", "ob"], name: "儿子的妹妹的哥哥", gender: "both" },
+  { path: ["s", "ys", "os"], name: "儿子的妹妹的姐姐", gender: "both" },
+  { path: ["s", "ys", "s"], name: "儿子的妹妹的儿子", gender: "both" },
+  { path: ["s", "ys", "w"], name: "儿子的妹妹的老婆", gender: "both" },
+  { path: ["s", "ys", "yb"], name: "儿子的妹妹的弟弟", gender: "both" },
+  { path: ["s", "ys", "ys"], name: "儿子的妹妹的妹妹", gender: "both" },
+  { path: ["w", "d", "d"], name: "老婆的女儿的女儿", gender: "both" },
+  { path: ["w", "d", "h"], name: "老婆的女儿的老公", gender: "both" },
+  { path: ["w", "d", "ob"], name: "老婆的女儿的哥哥", gender: "both" },
+  { path: ["w", "d", "os"], name: "老婆的女儿的姐姐", gender: "both" },
+  { path: ["w", "d", "s"], name: "老婆的女儿的儿子", gender: "both" },
+  { path: ["w", "d", "w"], name: "老婆的女儿的老婆", gender: "both" },
+  { path: ["w", "d", "yb"], name: "老婆的女儿的弟弟", gender: "both" },
+  { path: ["w", "d", "ys"], name: "老婆的女儿的妹妹", gender: "both" },
+  { path: ["w", "f", "d"], name: "老婆的爸爸的女儿", gender: "both" },
+  { path: ["w", "f", "h"], name: "老婆的爸爸的老公", gender: "both" },
+  { path: ["w", "f", "ob"], name: "老婆的爸爸的哥哥", gender: "both" },
+  { path: ["w", "f", "os"], name: "老婆的爸爸的姐姐", gender: "both" },
+  { path: ["w", "f", "s"], name: "老婆的爸爸的儿子", gender: "both" },
+  { path: ["w", "f", "w"], name: "老婆的爸爸的老婆", gender: "both" },
+  { path: ["w", "f", "yb"], name: "老婆的爸爸的弟弟", gender: "both" },
+  { path: ["w", "f", "ys"], name: "老婆的爸爸的妹妹", gender: "both" },
+  { path: ["w", "h", "h"], name: "老婆的老公的老公", gender: "both" },
+  { path: ["w", "m", "d"], name: "老婆的妈妈的女儿", gender: "both" },
+  { path: ["w", "m", "f"], name: "老婆的妈妈的爸爸", gender: "both" },
+  { path: ["w", "m", "h"], name: "老婆的妈妈的老公", gender: "both" },
+  { path: ["w", "m", "m"], name: "老婆的妈妈的妈妈", gender: "both" },
+  { path: ["w", "m", "ob"], name: "老婆的妈妈的哥哥", gender: "both" },
+  { path: ["w", "m", "os"], name: "老婆的妈妈的姐姐", gender: "both" },
+  { path: ["w", "m", "s"], name: "老婆的妈妈的儿子", gender: "both" },
+  { path: ["w", "m", "w"], name: "老婆的妈妈的老婆", gender: "both" },
+  { path: ["w", "m", "yb"], name: "老婆的妈妈的弟弟", gender: "both" },
+  { path: ["w", "m", "ys"], name: "老婆的妈妈的妹妹", gender: "both" },
+  { path: ["w", "ob", "d"], name: "老婆的哥哥的女儿", gender: "both" },
+  { path: ["w", "ob", "f"], name: "老婆的哥哥的爸爸", gender: "both" },
+  { path: ["w", "ob", "h"], name: "老婆的哥哥的老公", gender: "both" },
+  { path: ["w", "ob", "m"], name: "老婆的哥哥的妈妈", gender: "both" },
+  { path: ["w", "ob", "os"], name: "老婆的哥哥的姐姐", gender: "both" },
+  { path: ["w", "ob", "s"], name: "老婆的哥哥的儿子", gender: "both" },
+  { path: ["w", "ob", "w"], name: "老婆的哥哥的老婆", gender: "both" },
+  { path: ["w", "ob", "yb"], name: "老婆的哥哥的弟弟", gender: "both" },
+  { path: ["w", "ob", "ys"], name: "老婆的哥哥的妹妹", gender: "both" },
+  { path: ["w", "os", "d"], name: "老婆的姐姐的女儿", gender: "both" },
+  { path: ["w", "os", "f"], name: "老婆的姐姐的爸爸", gender: "both" },
+  { path: ["w", "os", "h"], name: "老婆的姐姐的老公", gender: "both" },
+  { path: ["w", "os", "m"], name: "老婆的姐姐的妈妈", gender: "both" },
+  { path: ["w", "os", "ob"], name: "老婆的姐姐的哥哥", gender: "both" },
+  { path: ["w", "os", "s"], name: "老婆的姐姐的儿子", gender: "both" },
+  { path: ["w", "os", "w"], name: "老婆的姐姐的老婆", gender: "both" },
+  { path: ["w", "os", "yb"], name: "老婆的姐姐的弟弟", gender: "both" },
+  { path: ["w", "os", "ys"], name: "老婆的姐姐的妹妹", gender: "both" },
+  { path: ["w", "s", "d"], name: "老婆的儿子的女儿", gender: "both" },
+  { path: ["w", "s", "h"], name: "老婆的儿子的老公", gender: "both" },
+  { path: ["w", "s", "ob"], name: "老婆的儿子的哥哥", gender: "both" },
+  { path: ["w", "s", "os"], name: "老婆的儿子的姐姐", gender: "both" },
+  { path: ["w", "s", "s"], name: "老婆的儿子的儿子", gender: "both" },
+  { path: ["w", "s", "w"], name: "老婆的儿子的老婆", gender: "both" },
+  { path: ["w", "s", "yb"], name: "老婆的儿子的弟弟", gender: "both" },
+  { path: ["w", "s", "ys"], name: "老婆的儿子的妹妹", gender: "both" },
+  { path: ["w", "w", "d"], name: "老婆的老婆的女儿", gender: "both" },
+  { path: ["w", "w", "f"], name: "老婆的老婆的爸爸", gender: "both" },
+  { path: ["w", "w", "m"], name: "老婆的老婆的妈妈", gender: "both" },
+  { path: ["w", "w", "ob"], name: "老婆的老婆的哥哥", gender: "both" },
+  { path: ["w", "w", "os"], name: "老婆的老婆的姐姐", gender: "both" },
+  { path: ["w", "w", "s"], name: "老婆的老婆的儿子", gender: "both" },
+  { path: ["w", "w", "w"], name: "老婆的老婆的老婆", gender: "both" },
+  { path: ["w", "w", "yb"], name: "老婆的老婆的弟弟", gender: "both" },
+  { path: ["w", "w", "ys"], name: "老婆的老婆的妹妹", gender: "both" },
+  { path: ["w", "yb", "d"], name: "老婆的弟弟的女儿", gender: "both" },
+  { path: ["w", "yb", "f"], name: "老婆的弟弟的爸爸", gender: "both" },
+  { path: ["w", "yb", "h"], name: "老婆的弟弟的老公", gender: "both" },
+  { path: ["w", "yb", "m"], name: "老婆的弟弟的妈妈", gender: "both" },
+  { path: ["w", "yb", "ob"], name: "老婆的弟弟的哥哥", gender: "both" },
+  { path: ["w", "yb", "os"], name: "老婆的弟弟的姐姐", gender: "both" },
+  { path: ["w", "yb", "s"], name: "老婆的弟弟的儿子", gender: "both" },
+  { path: ["w", "yb", "w"], name: "老婆的弟弟的老婆", gender: "both" },
+  { path: ["w", "yb", "ys"], name: "老婆的弟弟的妹妹", gender: "both" },
+  { path: ["w", "ys", "d"], name: "老婆的妹妹的女儿", gender: "both" },
+  { path: ["w", "ys", "f"], name: "老婆的妹妹的爸爸", gender: "both" },
+  { path: ["w", "ys", "h"], name: "老婆的妹妹的老公", gender: "both" },
+  { path: ["w", "ys", "m"], name: "老婆的妹妹的妈妈", gender: "both" },
+  { path: ["w", "ys", "ob"], name: "老婆的妹妹的哥哥", gender: "both" },
+  { path: ["w", "ys", "os"], name: "老婆的妹妹的姐姐", gender: "both" },
+  { path: ["w", "ys", "s"], name: "老婆的妹妹的儿子", gender: "both" },
+  { path: ["w", "ys", "w"], name: "老婆的妹妹的老婆", gender: "both" },
+  { path: ["w", "ys", "yb"], name: "老婆的妹妹的弟弟", gender: "both" },
+  { path: ["yb", "d", "d"], name: "弟弟的女儿的女儿", gender: "both" },
+  { path: ["yb", "d", "h"], name: "弟弟的女儿的老公", gender: "both" },
+  { path: ["yb", "d", "ob"], name: "弟弟的女儿的哥哥", gender: "both" },
+  { path: ["yb", "d", "os"], name: "弟弟的女儿的姐姐", gender: "both" },
+  { path: ["yb", "d", "s"], name: "弟弟的女儿的儿子", gender: "both" },
+  { path: ["yb", "d", "w"], name: "弟弟的女儿的老婆", gender: "both" },
+  { path: ["yb", "d", "yb"], name: "弟弟的女儿的弟弟", gender: "both" },
+  { path: ["yb", "d", "ys"], name: "弟弟的女儿的妹妹", gender: "both" },
+  { path: ["yb", "f", "d"], name: "弟弟的爸爸的女儿", gender: "both" },
+  { path: ["yb", "f", "f"], name: "弟弟的爸爸的爸爸", gender: "both" },
+  { path: ["yb", "f", "h"], name: "弟弟的爸爸的老公", gender: "both" },
+  { path: ["yb", "f", "m"], name: "弟弟的爸爸的妈妈", gender: "both" },
+  { path: ["yb", "f", "ob"], name: "弟弟的爸爸的哥哥", gender: "both" },
+  { path: ["yb", "f", "os"], name: "弟弟的爸爸的姐姐", gender: "both" },
+  { path: ["yb", "f", "s"], name: "弟弟的爸爸的儿子", gender: "both" },
+  { path: ["yb", "f", "w"], name: "弟弟的爸爸的老婆", gender: "both" },
+  { path: ["yb", "f", "yb"], name: "弟弟的爸爸的弟弟", gender: "both" },
+  { path: ["yb", "f", "ys"], name: "弟弟的爸爸的妹妹", gender: "both" },
+  { path: ["yb", "h", "f"], name: "弟弟的老公的爸爸", gender: "both" },
+  { path: ["yb", "h", "h"], name: "弟弟的老公的老公", gender: "both" },
+  { path: ["yb", "h", "m"], name: "弟弟的老公的妈妈", gender: "both" },
+  { path: ["yb", "h", "ob"], name: "弟弟的老公的哥哥", gender: "both" },
+  { path: ["yb", "h", "os"], name: "弟弟的老公的姐姐", gender: "both" },
+  { path: ["yb", "h", "yb"], name: "弟弟的老公的弟弟", gender: "both" },
+  { path: ["yb", "h", "ys"], name: "弟弟的老公的妹妹", gender: "both" },
+  { path: ["yb", "m", "d"], name: "弟弟的妈妈的女儿", gender: "both" },
+  { path: ["yb", "m", "f"], name: "弟弟的妈妈的爸爸", gender: "both" },
+  { path: ["yb", "m", "h"], name: "弟弟的妈妈的老公", gender: "both" },
+  { path: ["yb", "m", "m"], name: "弟弟的妈妈的妈妈", gender: "both" },
+  { path: ["yb", "m", "ob"], name: "弟弟的妈妈的哥哥", gender: "both" },
+  { path: ["yb", "m", "os"], name: "弟弟的妈妈的姐姐", gender: "both" },
+  { path: ["yb", "m", "s"], name: "弟弟的妈妈的儿子", gender: "both" },
+  { path: ["yb", "m", "w"], name: "弟弟的妈妈的老婆", gender: "both" },
+  { path: ["yb", "m", "yb"], name: "弟弟的妈妈的弟弟", gender: "both" },
+  { path: ["yb", "m", "ys"], name: "弟弟的妈妈的妹妹", gender: "both" },
+  { path: ["yb", "ob", "d"], name: "弟弟的哥哥的女儿", gender: "both" },
+  { path: ["yb", "ob", "f"], name: "弟弟的哥哥的爸爸", gender: "both" },
+  { path: ["yb", "ob", "h"], name: "弟弟的哥哥的老公", gender: "both" },
+  { path: ["yb", "ob", "m"], name: "弟弟的哥哥的妈妈", gender: "both" },
+  { path: ["yb", "ob", "os"], name: "弟弟的哥哥的姐姐", gender: "both" },
+  { path: ["yb", "ob", "s"], name: "弟弟的哥哥的儿子", gender: "both" },
+  { path: ["yb", "ob", "w"], name: "弟弟的哥哥的老婆", gender: "both" },
+  { path: ["yb", "ob", "yb"], name: "弟弟的哥哥的弟弟", gender: "both" },
+  { path: ["yb", "ob", "ys"], name: "弟弟的哥哥的妹妹", gender: "both" },
+  { path: ["yb", "os", "d"], name: "弟弟的姐姐的女儿", gender: "both" },
+  { path: ["yb", "os", "f"], name: "弟弟的姐姐的爸爸", gender: "both" },
+  { path: ["yb", "os", "h"], name: "弟弟的姐姐的老公", gender: "both" },
+  { path: ["yb", "os", "m"], name: "弟弟的姐姐的妈妈", gender: "both" },
+  { path: ["yb", "os", "ob"], name: "弟弟的姐姐的哥哥", gender: "both" },
+  { path: ["yb", "os", "s"], name: "弟弟的姐姐的儿子", gender: "both" },
+  { path: ["yb", "os", "w"], name: "弟弟的姐姐的老婆", gender: "both" },
+  { path: ["yb", "os", "yb"], name: "弟弟的姐姐的弟弟", gender: "both" },
+  { path: ["yb", "os", "ys"], name: "弟弟的姐姐的妹妹", gender: "both" },
+  { path: ["yb", "s", "h"], name: "弟弟的儿子的老公", gender: "both" },
+  { path: ["yb", "s", "ob"], name: "弟弟的儿子的哥哥", gender: "both" },
+  { path: ["yb", "s", "os"], name: "弟弟的儿子的姐姐", gender: "both" },
+  { path: ["yb", "s", "w"], name: "弟弟的儿子的老婆", gender: "both" },
+  { path: ["yb", "s", "yb"], name: "弟弟的儿子的弟弟", gender: "both" },
+  { path: ["yb", "s", "ys"], name: "弟弟的儿子的妹妹", gender: "both" },
+  { path: ["yb", "w", "f"], name: "弟弟的老婆的爸爸", gender: "both" },
+  { path: ["yb", "w", "m"], name: "弟弟的老婆的妈妈", gender: "both" },
+  { path: ["yb", "w", "ob"], name: "弟弟的老婆的哥哥", gender: "both" },
+  { path: ["yb", "w", "os"], name: "弟弟的老婆的姐姐", gender: "both" },
+  { path: ["yb", "w", "w"], name: "弟弟的老婆的老婆", gender: "both" },
+  { path: ["yb", "w", "yb"], name: "弟弟的老婆的弟弟", gender: "both" },
+  { path: ["yb", "w", "ys"], name: "弟弟的老婆的妹妹", gender: "both" },
+  { path: ["yb", "yb", "f"], name: "弟弟的弟弟的爸爸", gender: "both" },
+  { path: ["yb", "yb", "h"], name: "弟弟的弟弟的老公", gender: "both" },
+  { path: ["yb", "yb", "m"], name: "弟弟的弟弟的妈妈", gender: "both" },
+  { path: ["yb", "ys", "d"], name: "弟弟的妹妹的女儿", gender: "both" },
+  { path: ["yb", "ys", "f"], name: "弟弟的妹妹的爸爸", gender: "both" },
+  { path: ["yb", "ys", "h"], name: "弟弟的妹妹的老公", gender: "both" },
+  { path: ["yb", "ys", "m"], name: "弟弟的妹妹的妈妈", gender: "both" },
+  { path: ["yb", "ys", "ob"], name: "弟弟的妹妹的哥哥", gender: "both" },
+  { path: ["yb", "ys", "os"], name: "弟弟的妹妹的姐姐", gender: "both" },
+  { path: ["yb", "ys", "s"], name: "弟弟的妹妹的儿子", gender: "both" },
+  { path: ["yb", "ys", "w"], name: "弟弟的妹妹的老婆", gender: "both" },
+  { path: ["yb", "ys", "yb"], name: "弟弟的妹妹的弟弟", gender: "both" },
+  { path: ["ys", "d", "d"], name: "妹妹的女儿的女儿", gender: "both" },
+  { path: ["ys", "d", "h"], name: "妹妹的女儿的老公", gender: "both" },
+  { path: ["ys", "d", "ob"], name: "妹妹的女儿的哥哥", gender: "both" },
+  { path: ["ys", "d", "os"], name: "妹妹的女儿的姐姐", gender: "both" },
+  { path: ["ys", "d", "s"], name: "妹妹的女儿的儿子", gender: "both" },
+  { path: ["ys", "d", "w"], name: "妹妹的女儿的老婆", gender: "both" },
+  { path: ["ys", "d", "yb"], name: "妹妹的女儿的弟弟", gender: "both" },
+  { path: ["ys", "d", "ys"], name: "妹妹的女儿的妹妹", gender: "both" },
+  { path: ["ys", "f", "d"], name: "妹妹的爸爸的女儿", gender: "both" },
+  { path: ["ys", "f", "f"], name: "妹妹的爸爸的爸爸", gender: "both" },
+  { path: ["ys", "f", "h"], name: "妹妹的爸爸的老公", gender: "both" },
+  { path: ["ys", "f", "m"], name: "妹妹的爸爸的妈妈", gender: "both" },
+  { path: ["ys", "f", "ob"], name: "妹妹的爸爸的哥哥", gender: "both" },
+  { path: ["ys", "f", "os"], name: "妹妹的爸爸的姐姐", gender: "both" },
+  { path: ["ys", "f", "s"], name: "妹妹的爸爸的儿子", gender: "both" },
+  { path: ["ys", "f", "w"], name: "妹妹的爸爸的老婆", gender: "both" },
+  { path: ["ys", "f", "yb"], name: "妹妹的爸爸的弟弟", gender: "both" },
+  { path: ["ys", "f", "ys"], name: "妹妹的爸爸的妹妹", gender: "both" },
+  { path: ["ys", "h", "f"], name: "妹妹的老公的爸爸", gender: "both" },
+  { path: ["ys", "h", "h"], name: "妹妹的老公的老公", gender: "both" },
+  { path: ["ys", "h", "m"], name: "妹妹的老公的妈妈", gender: "both" },
+  { path: ["ys", "h", "ob"], name: "妹妹的老公的哥哥", gender: "both" },
+  { path: ["ys", "h", "os"], name: "妹妹的老公的姐姐", gender: "both" },
+  { path: ["ys", "h", "yb"], name: "妹妹的老公的弟弟", gender: "both" },
+  { path: ["ys", "h", "ys"], name: "妹妹的老公的妹妹", gender: "both" },
+  { path: ["ys", "m", "d"], name: "妹妹的妈妈的女儿", gender: "both" },
+  { path: ["ys", "m", "f"], name: "妹妹的妈妈的爸爸", gender: "both" },
+  { path: ["ys", "m", "h"], name: "妹妹的妈妈的老公", gender: "both" },
+  { path: ["ys", "m", "m"], name: "妹妹的妈妈的妈妈", gender: "both" },
+  { path: ["ys", "m", "ob"], name: "妹妹的妈妈的哥哥", gender: "both" },
+  { path: ["ys", "m", "os"], name: "妹妹的妈妈的姐姐", gender: "both" },
+  { path: ["ys", "m", "s"], name: "妹妹的妈妈的儿子", gender: "both" },
+  { path: ["ys", "m", "w"], name: "妹妹的妈妈的老婆", gender: "both" },
+  { path: ["ys", "m", "yb"], name: "妹妹的妈妈的弟弟", gender: "both" },
+  { path: ["ys", "m", "ys"], name: "妹妹的妈妈的妹妹", gender: "both" },
+  { path: ["ys", "ob", "d"], name: "妹妹的哥哥的女儿", gender: "both" },
+  { path: ["ys", "ob", "f"], name: "妹妹的哥哥的爸爸", gender: "both" },
+  { path: ["ys", "ob", "h"], name: "妹妹的哥哥的老公", gender: "both" },
+  { path: ["ys", "ob", "m"], name: "妹妹的哥哥的妈妈", gender: "both" },
+  { path: ["ys", "ob", "os"], name: "妹妹的哥哥的姐姐", gender: "both" },
+  { path: ["ys", "ob", "s"], name: "妹妹的哥哥的儿子", gender: "both" },
+  { path: ["ys", "ob", "w"], name: "妹妹的哥哥的老婆", gender: "both" },
+  { path: ["ys", "ob", "yb"], name: "妹妹的哥哥的弟弟", gender: "both" },
+  { path: ["ys", "ob", "ys"], name: "妹妹的哥哥的妹妹", gender: "both" },
+  { path: ["ys", "os", "d"], name: "妹妹的姐姐的女儿", gender: "both" },
+  { path: ["ys", "os", "f"], name: "妹妹的姐姐的爸爸", gender: "both" },
+  { path: ["ys", "os", "h"], name: "妹妹的姐姐的老公", gender: "both" },
+  { path: ["ys", "os", "m"], name: "妹妹的姐姐的妈妈", gender: "both" },
+  { path: ["ys", "os", "ob"], name: "妹妹的姐姐的哥哥", gender: "both" },
+  { path: ["ys", "os", "s"], name: "妹妹的姐姐的儿子", gender: "both" },
+  { path: ["ys", "os", "w"], name: "妹妹的姐姐的老婆", gender: "both" },
+  { path: ["ys", "os", "yb"], name: "妹妹的姐姐的弟弟", gender: "both" },
+  { path: ["ys", "os", "ys"], name: "妹妹的姐姐的妹妹", gender: "both" },
+  { path: ["ys", "s", "h"], name: "妹妹的儿子的老公", gender: "both" },
+  { path: ["ys", "s", "ob"], name: "妹妹的儿子的哥哥", gender: "both" },
+  { path: ["ys", "s", "os"], name: "妹妹的儿子的姐姐", gender: "both" },
+  { path: ["ys", "s", "w"], name: "妹妹的儿子的老婆", gender: "both" },
+  { path: ["ys", "s", "yb"], name: "妹妹的儿子的弟弟", gender: "both" },
+  { path: ["ys", "s", "ys"], name: "妹妹的儿子的妹妹", gender: "both" },
+  { path: ["ys", "w", "f"], name: "妹妹的老婆的爸爸", gender: "both" },
+  { path: ["ys", "w", "m"], name: "妹妹的老婆的妈妈", gender: "both" },
+  { path: ["ys", "w", "ob"], name: "妹妹的老婆的哥哥", gender: "both" },
+  { path: ["ys", "w", "os"], name: "妹妹的老婆的姐姐", gender: "both" },
+  { path: ["ys", "w", "w"], name: "妹妹的老婆的老婆", gender: "both" },
+  { path: ["ys", "w", "yb"], name: "妹妹的老婆的弟弟", gender: "both" },
+  { path: ["ys", "w", "ys"], name: "妹妹的老婆的妹妹", gender: "both" },
+  { path: ["ys", "yb", "d"], name: "妹妹的弟弟的女儿", gender: "both" },
+  { path: ["ys", "yb", "f"], name: "妹妹的弟弟的爸爸", gender: "both" },
+  { path: ["ys", "yb", "h"], name: "妹妹的弟弟的老公", gender: "both" },
+  { path: ["ys", "yb", "m"], name: "妹妹的弟弟的妈妈", gender: "both" },
+  { path: ["ys", "yb", "ob"], name: "妹妹的弟弟的哥哥", gender: "both" },
+  { path: ["ys", "yb", "os"], name: "妹妹的弟弟的姐姐", gender: "both" },
+  { path: ["ys", "yb", "s"], name: "妹妹的弟弟的儿子", gender: "both" },
+  { path: ["ys", "yb", "w"], name: "妹妹的弟弟的老婆", gender: "both" },
+  { path: ["ys", "yb", "ys"], name: "妹妹的弟弟的妹妹", gender: "both" },
+  { path: ["ys", "ys", "f"], name: "妹妹的妹妹的爸爸", gender: "both" },
+  { path: ["ys", "ys", "m"], name: "妹妹的妹妹的妈妈", gender: "both" },
+  { path: ["ys", "ys", "w"], name: "妹妹的妹妹的老婆", gender: "both" },
+  { path: ["d", "f", "w"], name: "女儿的爸爸的老婆", gender: "both" },
+  { path: ["d", "m", "w"], name: "女儿的妈妈的老婆", gender: "both" },
+  { path: ["h", "w", "w"], name: "老公的老婆的老婆", gender: "both" },
+  { path: ["s", "f", "w"], name: "儿子的爸爸的老婆", gender: "both" },
+  { path: ["s", "m", "w"], name: "儿子的妈妈的老婆", gender: "both" },
+  { path: ["w", "d", "f"], name: "老婆的女儿的爸爸", gender: "both" },
+  { path: ["w", "d", "m"], name: "老婆的女儿的妈妈", gender: "both" },
+  { path: ["w", "h", "w"], name: "老婆的老公的老婆", gender: "both" },
+  { path: ["w", "ob", "ob"], name: "老婆的哥哥的哥哥", gender: "both" },
+  { path: ["w", "os", "os"], name: "老婆的姐姐的姐姐", gender: "both" },
+  { path: ["w", "s", "f"], name: "老婆的儿子的爸爸", gender: "both" },
+  { path: ["w", "s", "m"], name: "老婆的儿子的妈妈", gender: "both" },
+  { path: ["w", "w", "h"], name: "老婆的老婆的老公", gender: "both" },
+  { path: ["w", "yb", "yb"], name: "老婆的弟弟的弟弟", gender: "both" },
+  { path: ["w", "ys", "ys"], name: "老婆的妹妹的妹妹", gender: "both" },
+  { path: ["f", "h"], name: "爸爸的老公", gender: "both" },
+  { path: ["m", "w"], name: "妈妈的老婆", gender: "both" },
+  { path: ["f", "f", "h"], name: "爸爸的爸爸的老公", gender: "both" },
+  { path: ["f", "f", "w"], name: "爸爸的爸爸的老婆", gender: "both" },
+  { path: ["f", "m", "h"], name: "爸爸的妈妈的老公", gender: "both" },
+  { path: ["f", "m", "w"], name: "爸爸的妈妈的老婆", gender: "both" },
+  { path: ["f", "ob", "h"], name: "爸爸的哥哥的老公", gender: "both" },
+  { path: ["f", "ob", "ob"], name: "爸爸的哥哥的哥哥", gender: "both" },
+  { path: ["f", "ob", "os"], name: "爸爸的哥哥的姐姐", gender: "both" },
+  { path: ["f", "ob", "w"], name: "爸爸的哥哥的老婆", gender: "both" },
+  { path: ["f", "ob", "yb"], name: "爸爸的哥哥的弟弟", gender: "both" },
+  { path: ["f", "ob", "ys"], name: "爸爸的哥哥的妹妹", gender: "both" },
+  { path: ["f", "os", "h"], name: "爸爸的姐姐的老公", gender: "both" },
+  { path: ["f", "os", "ob"], name: "爸爸的姐姐的哥哥", gender: "both" },
+  { path: ["f", "os", "os"], name: "爸爸的姐姐的姐姐", gender: "both" },
+  { path: ["f", "os", "w"], name: "爸爸的姐姐的老婆", gender: "both" },
+  { path: ["f", "os", "yb"], name: "爸爸的姐姐的弟弟", gender: "both" },
+  { path: ["f", "os", "ys"], name: "爸爸的姐姐的妹妹", gender: "both" },
+  { path: ["f", "yb", "h"], name: "爸爸的弟弟的老公", gender: "both" },
+  { path: ["f", "yb", "ob"], name: "爸爸的弟弟的哥哥", gender: "both" },
+  { path: ["f", "yb", "os"], name: "爸爸的弟弟的姐姐", gender: "both" },
+  { path: ["f", "yb", "w"], name: "爸爸的弟弟的老婆", gender: "both" },
+  { path: ["f", "yb", "yb"], name: "爸爸的弟弟的弟弟", gender: "both" },
+  { path: ["f", "yb", "ys"], name: "爸爸的弟弟的妹妹", gender: "both" },
+  { path: ["f", "ys", "h"], name: "爸爸的妹妹的老公", gender: "both" },
+  { path: ["f", "ys", "ob"], name: "爸爸的妹妹的哥哥", gender: "both" },
+  { path: ["f", "ys", "os"], name: "爸爸的妹妹的姐姐", gender: "both" },
+  { path: ["f", "ys", "w"], name: "爸爸的妹妹的老婆", gender: "both" },
+  { path: ["f", "ys", "yb"], name: "爸爸的妹妹的弟弟", gender: "both" },
+  { path: ["f", "ys", "ys"], name: "爸爸的妹妹的妹妹", gender: "both" },
+  { path: ["m", "f", "h"], name: "妈妈的爸爸的老公", gender: "both" },
+  { path: ["m", "f", "w"], name: "妈妈的爸爸的老婆", gender: "both" },
+  { path: ["m", "m", "h"], name: "妈妈的妈妈的老公", gender: "both" },
+  { path: ["m", "m", "w"], name: "妈妈的妈妈的老婆", gender: "both" },
+  { path: ["m", "ob", "h"], name: "妈妈的哥哥的老公", gender: "both" },
+  { path: ["m", "ob", "ob"], name: "妈妈的哥哥的哥哥", gender: "both" },
+  { path: ["m", "ob", "os"], name: "妈妈的哥哥的姐姐", gender: "both" },
+  { path: ["m", "ob", "w"], name: "妈妈的哥哥的老婆", gender: "both" },
+  { path: ["m", "ob", "yb"], name: "妈妈的哥哥的弟弟", gender: "both" },
+  { path: ["m", "ob", "ys"], name: "妈妈的哥哥的妹妹", gender: "both" },
+  { path: ["m", "os", "h"], name: "妈妈的姐姐的老公", gender: "both" },
+  { path: ["m", "os", "ob"], name: "妈妈的姐姐的哥哥", gender: "both" },
+  { path: ["m", "os", "os"], name: "妈妈的姐姐的姐姐", gender: "both" },
+  { path: ["m", "os", "w"], name: "妈妈的姐姐的老婆", gender: "both" },
+  { path: ["m", "os", "yb"], name: "妈妈的姐姐的弟弟", gender: "both" },
+  { path: ["m", "os", "ys"], name: "妈妈的姐姐的妹妹", gender: "both" },
+  { path: ["m", "yb", "h"], name: "妈妈的弟弟的老公", gender: "both" },
+  { path: ["m", "yb", "ob"], name: "妈妈的弟弟的哥哥", gender: "both" },
+  { path: ["m", "yb", "os"], name: "妈妈的弟弟的姐姐", gender: "both" },
+  { path: ["m", "yb", "w"], name: "妈妈的弟弟的老婆", gender: "both" },
+  { path: ["m", "yb", "yb"], name: "妈妈的弟弟的弟弟", gender: "both" },
+  { path: ["m", "yb", "ys"], name: "妈妈的弟弟的妹妹", gender: "both" },
+  { path: ["m", "ys", "h"], name: "妈妈的妹妹的老公", gender: "both" },
+  { path: ["m", "ys", "ob"], name: "妈妈的妹妹的哥哥", gender: "both" },
+  { path: ["m", "ys", "os"], name: "妈妈的妹妹的姐姐", gender: "both" },
+  { path: ["m", "ys", "w"], name: "妈妈的妹妹的老婆", gender: "both" },
+  { path: ["m", "ys", "yb"], name: "妈妈的妹妹的弟弟", gender: "both" },
+  { path: ["m", "ys", "ys"], name: "妈妈的妹妹的妹妹", gender: "both" },
+  { path: ["ob", "h", "d"], name: "哥哥的老公的女儿", gender: "both" },
+  { path: ["ob", "h", "s"], name: "哥哥的老公的儿子", gender: "both" },
+  { path: ["ob", "ob", "d"], name: "哥哥的哥哥的女儿", gender: "both" },
+  { path: ["ob", "ob", "os"], name: "哥哥的哥哥的姐姐", gender: "both" },
+  { path: ["ob", "ob", "s"], name: "哥哥的哥哥的儿子", gender: "both" },
+  { path: ["ob", "ob", "yb"], name: "哥哥的哥哥的弟弟", gender: "both" },
+  { path: ["ob", "ob", "ys"], name: "哥哥的哥哥的妹妹", gender: "both" },
+  { path: ["ob", "os", "os"], name: "哥哥的姐姐的姐姐", gender: "both" },
+  { path: ["ob", "w", "d"], name: "哥哥的老婆的女儿", gender: "both" },
+  { path: ["ob", "w", "s"], name: "哥哥的老婆的儿子", gender: "both" },
+  { path: ["ob", "yb", "yb"], name: "哥哥的弟弟的弟弟", gender: "both" },
+  { path: ["ob", "ys", "ys"], name: "哥哥的妹妹的妹妹", gender: "both" },
+  { path: ["os", "h", "d"], name: "姐姐的老公的女儿", gender: "both" },
+  { path: ["os", "h", "s"], name: "姐姐的老公的儿子", gender: "both" },
+  { path: ["os", "ob", "ob"], name: "姐姐的哥哥的哥哥", gender: "both" },
+  { path: ["os", "os", "d"], name: "姐姐的姐姐的女儿", gender: "both" },
+  { path: ["os", "os", "ob"], name: "姐姐的姐姐的哥哥", gender: "both" },
+  { path: ["os", "os", "s"], name: "姐姐的姐姐的儿子", gender: "both" },
+  { path: ["os", "os", "yb"], name: "姐姐的姐姐的弟弟", gender: "both" },
+  { path: ["os", "os", "ys"], name: "姐姐的姐姐的妹妹", gender: "both" },
+  { path: ["os", "w", "d"], name: "姐姐的老婆的女儿", gender: "both" },
+  { path: ["os", "w", "s"], name: "姐姐的老婆的儿子", gender: "both" },
+  { path: ["os", "yb", "yb"], name: "姐姐的弟弟的弟弟", gender: "both" },
+  { path: ["os", "ys", "ys"], name: "姐姐的妹妹的妹妹", gender: "both" },
+  { path: ["yb", "h", "d"], name: "弟弟的老公的女儿", gender: "both" },
+  { path: ["yb", "h", "s"], name: "弟弟的老公的儿子", gender: "both" },
+  { path: ["yb", "ob", "ob"], name: "弟弟的哥哥的哥哥", gender: "both" },
+  { path: ["yb", "os", "os"], name: "弟弟的姐姐的姐姐", gender: "both" },
+  { path: ["yb", "w", "d"], name: "弟弟的老婆的女儿", gender: "both" },
+  { path: ["yb", "w", "s"], name: "弟弟的老婆的儿子", gender: "both" },
+  { path: ["yb", "yb", "d"], name: "弟弟的弟弟的女儿", gender: "both" },
+  { path: ["yb", "yb", "ob"], name: "弟弟的弟弟的哥哥", gender: "both" },
+  { path: ["yb", "yb", "os"], name: "弟弟的弟弟的姐姐", gender: "both" },
+  { path: ["yb", "yb", "s"], name: "弟弟的弟弟的儿子", gender: "both" },
+  { path: ["yb", "yb", "ys"], name: "弟弟的弟弟的妹妹", gender: "both" },
+  { path: ["yb", "ys", "ys"], name: "弟弟的妹妹的妹妹", gender: "both" },
+  { path: ["ys", "h", "d"], name: "妹妹的老公的女儿", gender: "both" },
+  { path: ["ys", "h", "s"], name: "妹妹的老公的儿子", gender: "both" },
+  { path: ["ys", "ob", "ob"], name: "妹妹的哥哥的哥哥", gender: "both" },
+  { path: ["ys", "os", "os"], name: "妹妹的姐姐的姐姐", gender: "both" },
+  { path: ["ys", "w", "d"], name: "妹妹的老婆的女儿", gender: "both" },
+  { path: ["ys", "w", "s"], name: "妹妹的老婆的儿子", gender: "both" },
+  { path: ["ys", "yb", "yb"], name: "妹妹的弟弟的弟弟", gender: "both" },
+  { path: ["ys", "ys", "d"], name: "妹妹的妹妹的女儿", gender: "both" },
+  { path: ["ys", "ys", "ob"], name: "妹妹的妹妹的哥哥", gender: "both" },
+  { path: ["ys", "ys", "os"], name: "妹妹的妹妹的姐姐", gender: "both" },
+  { path: ["ys", "ys", "s"], name: "妹妹的妹妹的儿子", gender: "both" },
+  { path: ["ys", "ys", "yb"], name: "妹妹的妹妹的弟弟", gender: "both" },
+
   // 曾孙辈（通用）
   { path: ["s", "s", "s"], name: "曾孙子", gender: "both" },
   { path: ["s", "s", "d"], name: "曾孙女", gender: "both" },
@@ -181,6 +1092,43 @@ const relationshipMappings = [
   { path: ["m", "d"], name: "我/姐妹", gender: "female" },
 ];
 
+// 在 Node 测试环境下，从 missing-relations.txt 自动同步缺失条目到 relationshipMappings（去重）
+if (typeof module !== "undefined" && module.exports) {
+  try {
+    const fs = require("fs");
+    const path = require("path");
+    const raw = fs.readFileSync(
+      path.join(__dirname, "..", "..", "missing-relations.txt"),
+      "utf8"
+    );
+    const VALID_LINE_RE =
+      /^(?:-\s*)?(?:f|m|h|w|ob|yb|os|ys|s|d)(?:-(?:f|m|h|w|ob|yb|os|ys|s|d))*$/;
+    const lines = raw
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .filter((l) => VALID_LINE_RE.test(l));
+    const parse = (line) =>
+      line
+        .replace(/^[-\s]*/, "")
+        .split("-")
+        .map((t) => t.trim())
+        .filter(Boolean);
+    const existing = new Set(relationshipMappings.map((m) => m.path.join("-")));
+    lines.forEach((ln) => {
+      const tokens = parse(ln);
+      const key = tokens.join("-");
+      if (!existing.has(key)) {
+        const name = tokens.map((t) => tokenToLabel[t] || t).join("的");
+        relationshipMappings.push({ path: tokens, name, gender: "both" });
+        existing.add(key);
+      }
+    });
+  } catch (e) {
+    // 在非 Node 环境或文件读取失败时忽略
+  }
+}
+
 const resultMap = {};
 
 // 处理亲属关系映射
@@ -228,33 +1176,17 @@ function normalizePath(tokens) {
         changed = true;
         break;
       }
-      // 相同兄弟姐妹关系抵消（无论是否有共同父母）
+      // 相同兄弟姐妹关系抵消 (例如 我哥哥的哥哥 -> 我哥哥)
+      // 此规则仅在非父辈的兄弟姐妹关系时应用，以避免过度简化
+      const isAfterParent = i > 0 && (arr[i - 1] === "f" || arr[i - 1] === "m");
       if (
-        (a === "ob" && b === "ob") ||
-        (a === "yb" && b === "yb") ||
-        (a === "os" && b === "os") ||
-        (a === "ys" && b === "ys")
+        !isAfterParent &&
+        ((a === "ob" && b === "ob") ||
+          (a === "yb" && b === "yb") ||
+          (a === "os" && b === "os") ||
+          (a === "ys" && b === "ys"))
       ) {
-        arr.splice(i, 2, a);
-        changed = true;
-        break;
-      }
-      // 同一父母的兄弟姐妹关系抵消（仅当前面有共同父母时）
-      const siblings = ["ob", "yb", "os", "ys"];
-      if (
-        i > 0 &&
-        (arr[i - 1] === "f" || arr[i - 1] === "m") &&
-        siblings.includes(a) &&
-        siblings.includes(b) &&
-        a !== b
-      ) {
-        // 对于姐弟/兄妹关系，保留弟弟/妹妹
-        if ((a === "os" && b === "yb") || (a === "ob" && b === "ys")) {
-          arr.splice(i, 2, b);
-        } else {
-          // 其他情况保留第一个
-          arr.splice(i, 2, a);
-        }
+        arr.splice(i, 1); // 只移除一个，保留一个
         changed = true;
         break;
       }
@@ -303,7 +1235,7 @@ function findResult(isMale, pathTokens) {
   // 例如：妈妈-弟弟-姐姐 → 可能是 妈妈 本人，或 妈妈的姐妹（姨妈/小姨）
   const sibs = ["ob", "yb", "os", "ys"];
   if (
-    pathTokens.length >= 3 &&
+    pathTokens.length === 3 &&
     (pathTokens[0] === "m" || pathTokens[0] === "f") &&
     sibs.includes(pathTokens[1]) &&
     sibs.includes(pathTokens[2]) &&
@@ -319,7 +1251,31 @@ function findResult(isMale, pathTokens) {
       return lastIsMale ? "爸爸/伯伯/叔叔" : "姑姑";
     }
   }
-  const norm = normalizePath(pathTokens);
+
+  let norm = normalizePath(pathTokens);
+
+  // 修复父辈后多个兄弟姐妹关系链的简化问题
+  if (
+    norm.length > 2 &&
+    (norm[0] === "f" || norm[0] === "m") &&
+    sibs.includes(norm[1])
+  ) {
+    const nonSibsIndex = norm.findIndex(
+      (token, index) => index > 0 && !sibs.includes(token)
+    );
+    const sibsChain = norm.slice(
+      1,
+      nonSibsIndex === -1 ? norm.length : nonSibsIndex
+    );
+
+    if (sibsChain.length > 1) {
+      // 将 f-ob-ob... or f-ob-yb... 简化为 f-ob...
+      const simplifiedSib = sibsChain[sibsChain.length - 1];
+      const restOfPath = nonSibsIndex === -1 ? [] : norm.slice(nonSibsIndex);
+      norm = [norm[0], simplifiedSib, ...restOfPath];
+    }
+  }
+
   const direct = resultMap[key(sex, norm)];
   if (direct) return direct;
   if (norm.length === 0) return "自己";
@@ -337,12 +1293,12 @@ function findResult(isMale, pathTokens) {
       return buildAncestorName(toggled);
     }
   }
+
   if (
+    norm.length === 3 &&
     (norm[0] === "f" || norm[0] === "m") &&
-    (norm[1] === "ob" ||
-      norm[1] === "yb" ||
-      norm[1] === "os" ||
-      norm[1] === "ys")
+    sibs.includes(norm[1]) &&
+    (norm[2] === "w" || norm[2] === "h")
   ) {
     const side = norm[0],
       sib = norm[1],
@@ -356,7 +1312,9 @@ function findResult(isMale, pathTokens) {
       if (sib === "os" || sib === "ys") return spouse === "h" ? "姨夫" : "姨妈";
     }
   }
-  return "未收录的关系（待完善）";
+  // 回退：将 token 路径转换为可读的中文描述（例如 "妈妈的弟弟的儿子"），避免返回未收录提示
+  const readable = norm.map((t) => tokenToLabel[t] || t).join("的");
+  return readable;
 }
 
 function findReverseResult(isMale, pathTokens) {
@@ -380,9 +1338,9 @@ function findReverseResult(isMale, pathTokens) {
       case "yb":
         return male ? "哥哥" : "姐姐";
       case "os":
-        return male ? "妹妹" : "妹妹";
+        return male ? "弟弟" : "妹妹";
       case "ys":
-        return male ? "姐姐" : "姐姐";
+        return male ? "哥哥" : "姐姐";
       default:
         return "未收录的关系（待完善）";
     }
@@ -391,28 +1349,46 @@ function findReverseResult(isMale, pathTokens) {
   // 处理多代祖辈关系
   if (norm.every((t) => t === "f" || t === "m")) {
     const generation = norm.length;
-    if (generation === 2) {
-      // 祖父母
-      return isMale ? "孙子" : "孙女";
-    } else if (generation === 3) {
-      // 曾祖父母
-      return isMale ? "曾孙子" : "曾孙女";
-    } else if (generation === 4) {
-      // 高祖父母
-      return isMale ? "玄孙子" : "玄孙女";
-    }
+    if (generation === 2) return isMale ? "孙子" : "孙女";
+    if (generation === 3) return isMale ? "曾孙子" : "曾孙女";
+    if (generation >= 4) return isMale ? "玄孙子" : "玄孙女";
   }
 
   const a = norm[0],
-    b = norm[1];
-  if (a === "m" && (b === "f" || b === "m"))
-    return isMale ? "外孙子" : "外孙女";
-  if (a === "w" && (b === "f" || b === "m")) return "女婿";
-  if (a === "h" && (b === "f" || b === "m")) return "儿媳";
+    b = norm[1],
+    c = norm[2];
 
-  // 处理兄弟姐妹的配偶关系
-  if ((a === "os" || a === "ys") && b === "h") {
-    return male ? "妻弟" : "弟妹";
+  // 长度为3的关系链
+  if (norm.length === 3 && (c === "s" || c === "d")) {
+    // 堂亲
+    if (a === "f" && (b === "ob" || b === "yb")) {
+      return `堂${male ? "兄/弟" : "姐/妹"}`;
+    }
+    // 表亲 (父系)
+    if (a === "f" && (b === "os" || b === "ys")) {
+      return `表${male ? "兄/弟" : "姐/妹"}`;
+    }
+    // 表亲 (母系)
+    if (a === "m" && (b === "ob" || b === "yb" || b === "os" || b === "ys")) {
+      return `表${male ? "兄/弟" : "姐/妹"}`;
+    }
+  }
+
+  // 长度为2的关系链
+  if (norm.length === 2) {
+    if (a === "f" && (b === "ob" || b === "yb" || b === "os" || b === "ys")) {
+      return male ? "侄子" : "侄女";
+    }
+    if (a === "m" && (b === "ob" || b === "yb" || b === "os" || b === "ys")) {
+      return male ? "外甥" : "外甥女";
+    }
+    if (a === "m" && (b === "f" || b === "m"))
+      return isMale ? "外孙子" : "外孙女";
+    if (a === "w" && (b === "f" || b === "m")) return "女婿";
+    if (a === "h" && (b === "f" || b === "m")) return "儿媳";
+    if ((a === "os" || a === "ys") && b === "h") return male ? "内弟" : "弟妹";
+    if ((a === "ob" || a === "yb") && b === "w")
+      return male ? "内兄/内弟" : "嫂子/弟媳";
   }
 
   return "未收录的关系（待完善）";
@@ -439,8 +1415,27 @@ Page({
     disableH: false,
     disableW: false,
   },
-  onLoad() {
+  onLoad(options) {
+    // 处理分享链接打开
+    if (options.state) {
+      try {
+        const state = JSON.parse(decodeURIComponent(options.state));
+        this.setData({
+          expr: state.expr || [],
+          isMale: state.isMale !== undefined ? state.isMale : true,
+          reverseMode: state.reverseMode || false,
+        });
+      } catch (e) {
+        console.log("解析分享状态失败:", e);
+      }
+    }
+
     this._recompute();
+    // 显示分享菜单
+    wx.showShareMenu({
+      withShareTicket: true,
+      menus: ["shareAppMessage", "shareTimeline"],
+    });
   },
 
   onChangeGender(e) {
@@ -482,6 +1477,33 @@ Page({
     this.setData({ isDark: !this.data.isDark });
   },
 
+  // 手动触发分享
+  onShare() {
+    const { formulaText, displayResult } = this.data;
+    if (formulaText && displayResult) {
+      wx.showModal({
+        title: "分享计算结果",
+        content: `${formulaText} = ${displayResult}`,
+        confirmText: "分享",
+        cancelText: "取消",
+        success: (res) => {
+          if (res.confirm) {
+            // 触发分享
+            wx.showShareMenu({
+              withShareTicket: true,
+              menus: ["shareAppMessage", "shareTimeline"],
+            });
+          }
+        },
+      });
+    } else {
+      wx.showToast({
+        title: "请先计算一个关系",
+        icon: "none",
+      });
+    }
+  },
+
   _recompute() {
     const tokens = this.data.expr
       .map((lbl) => labelToToken[lbl])
@@ -502,6 +1524,48 @@ Page({
     const disableH = tailGender === "male";
     const disableW = tailGender === "female";
     this.setData({ formulaText, displayResult, disableH, disableW });
+  },
+
+  // 分享给朋友
+  onShareAppMessage() {
+    const { formulaText, displayResult, isMale } = this.data;
+    let shareTitle = "亲属称呼换算 - 快速计算亲属关系";
+    let sharePath = "/pages/index/index";
+
+    // 如果有计算结果，在分享内容中包含
+    if (formulaText && displayResult) {
+      shareTitle = `${formulaText} = ${displayResult}`;
+      // 可以将当前状态编码到分享路径中
+      const state = encodeURIComponent(
+        JSON.stringify({
+          expr: this.data.expr,
+          isMale: this.data.isMale,
+          reverseMode: this.data.reverseMode,
+        })
+      );
+      sharePath += `?state=${state}`;
+    }
+
+    return {
+      title: shareTitle,
+      path: sharePath,
+    };
+  },
+
+  // 分享到朋友圈
+  onShareTimeline() {
+    const { formulaText, displayResult } = this.data;
+    let shareTitle = "亲属称呼换算 - 快速计算亲属关系";
+
+    // 如果有计算结果，在分享内容中包含
+    if (formulaText && displayResult) {
+      shareTitle = `${formulaText} = ${displayResult}`;
+    }
+
+    return {
+      title: shareTitle,
+      query: "",
+    };
   },
 });
 
@@ -524,4 +1588,19 @@ function inferTailGender(tokens, isMale) {
     else if (t === "d") gender = "female"; // 女儿是女性
   }
   return gender;
+}
+
+// 导出函数供测试使用
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    findResult,
+    findReverseResult,
+    normalizePath,
+    relationshipMappings,
+    labelToToken,
+    buildAncestorName,
+    buildDescendantName,
+    repeatStr,
+    inferTailGender,
+  };
 }
