@@ -61,6 +61,12 @@ const relationshipMappings = [
   // 子女的配偶（通用）
   { path: ["s", "w"], name: "儿媳", gender: "both" },
   { path: ["d", "h"], name: "女婿", gender: "both" },
+  // 子女配偶的父母
+  { path: ["s", "w", "f"], name: "亲家公", gender: "both" },
+  { path: ["s", "w", "m"], name: "亲家母", gender: "both" },
+  { path: ["d", "h", "f"], name: "亲家公", gender: "both" },
+  { path: ["d", "h", "m"], name: "亲家母", gender: "both" },
+  ,
   // 兄弟姐妹的子女（通用）
   { path: ["ob", "s"], name: "侄子", gender: "both" },
   { path: ["ob", "d"], name: "侄女", gender: "both" },
@@ -71,23 +77,41 @@ const relationshipMappings = [
   { path: ["ys", "s"], name: "外甥", gender: "both" },
   { path: ["ys", "d"], name: "外甥女", gender: "both" },
   // 堂亲关系 (父亲的兄弟姐妹的子女)（通用）
-  { path: ["f", "ob", "s"], name: "堂哥", gender: "both" },
-  { path: ["f", "ob", "d"], name: "堂姐", gender: "both" },
-  { path: ["f", "yb", "s"], name: "堂弟", gender: "both" },
-  { path: ["f", "yb", "d"], name: "堂妹", gender: "both" },
-  { path: ["f", "os", "s"], name: "表哥", gender: "both" },
-  { path: ["f", "os", "d"], name: "表姐", gender: "both" },
-  { path: ["f", "ys", "s"], name: "表弟", gender: "both" },
-  { path: ["f", "ys", "d"], name: "表妹", gender: "both" },
+  { path: ["f", "ob", "s"], name: "堂哥/堂弟", gender: "both" },
+  { path: ["f", "ob", "d"], name: "堂姐/堂妹", gender: "both" },
+  { path: ["f", "yb", "s"], name: "堂哥/堂弟", gender: "both" },
+  { path: ["f", "yb", "d"], name: "堂姐/堂妹", gender: "both" },
+  { path: ["f", "os", "s"], name: "表哥/表弟", gender: "both" },
+  { path: ["f", "os", "d"], name: "表姐/表妹", gender: "both" },
+  { path: ["f", "ys", "s"], name: "表哥/表弟", gender: "both" },
+  { path: ["m", "ys", "d"], name: "表姐/表妹", gender: "both" },
+  // 堂/表兄弟的子女
+  { path: ["f", "ob", "s", "s"], name: "堂侄", gender: "both" },
+  { path: ["f", "ob", "s", "d"], name: "堂侄女", gender: "both" },
+  { path: ["f", "yb", "s", "s"], name: "堂侄", gender: "both" },
+  { path: ["f", "yb", "s", "d"], name: "堂侄女", gender: "both" },
+  { path: ["f", "os", "s", "s"], name: "表侄", gender: "both" },
+  { path: ["f", "os", "s", "d"], name: "表侄女", gender: "both" },
+  { path: ["f", "ys", "s", "s"], name: "表侄", gender: "both" },
+  { path: ["f", "ys", "s", "d"], name: "表侄女", gender: "both" },
+  { path: ["m", "ob", "s", "s"], name: "表侄", gender: "both" },
+  { path: ["m", "ob", "s", "d"], name: "表侄女", gender: "both" },
+  { path: ["m", "yb", "s", "s"], name: "表侄", gender: "both" },
+  { path: ["m", "yb", "s", "d"], name: "表侄女", gender: "both" },
+  { path: ["m", "os", "s", "s"], name: "表侄", gender: "both" },
+  { path: ["m", "os", "s", "d"], name: "表侄女", gender: "both" },
+  { path: ["m", "ys", "s", "s"], name: "表侄", gender: "both" },
+  { path: ["m", "ys", "s", "d"], name: "表侄女", gender: "both" },
+  ,
   // 表亲关系 (母亲的兄弟姐妹的子女)（通用）
-  { path: ["m", "ob", "s"], name: "表哥", gender: "both" },
-  { path: ["m", "ob", "d"], name: "表姐", gender: "both" },
-  { path: ["m", "yb", "s"], name: "表弟", gender: "both" },
-  { path: ["m", "yb", "d"], name: "表妹", gender: "both" },
-  { path: ["m", "os", "s"], name: "表哥", gender: "both" },
-  { path: ["m", "os", "d"], name: "表姐", gender: "both" },
-  { path: ["m", "ys", "s"], name: "表弟", gender: "both" },
-  { path: ["m", "ys", "d"], name: "表妹", gender: "both" },
+  { path: ["m", "ob", "s"], name: "表哥/表弟", gender: "both" },
+  { path: ["m", "ob", "d"], name: "表姐/表妹", gender: "both" },
+  { path: ["m", "yb", "s"], name: "表哥/表弟", gender: "both" },
+  { path: ["m", "yb", "d"], name: "表姐/表妹", gender: "both" },
+  { path: ["m", "os", "s"], name: "表哥/表弟", gender: "both" },
+  { path: ["m", "os", "d"], name: "表姐/表妹", gender: "both" },
+  { path: ["m", "ys", "s"], name: "表哥/表弟", gender: "both" },
+  { path: ["m", "ys", "d"], name: "表姐/表妹", gender: "both" },
   // 祖辈的兄弟姐妹关系（通用）
   { path: ["f", "f", "ob"], name: "舅公", gender: "both" },
   { path: ["f", "f", "os"], name: "姨婆", gender: "both" },
@@ -1150,6 +1174,26 @@ function normalizePath(tokens) {
         changed = true;
         break;
       }
+      // 爸爸的老婆 -> 妈妈; 妈妈的老公 -> 爸爸
+      if (a === "f" && b === "w") {
+        arr.splice(i, 2, "m");
+        changed = true;
+        break;
+      }
+      if (a === "m" && b === "h") {
+        arr.splice(i, 2, "f");
+        changed = true;
+        break;
+      }
+      // 兄弟姐妹的父母 -> 自己的父母
+      if (
+        (a === "ob" || a === "yb" || a === "os" || a === "ys") &&
+        (b === "f" || b === "m")
+      ) {
+        arr.splice(i, 1); // 删除兄弟姐妹节点，保留父节点
+        changed = true;
+        break;
+      }
       // 父子/母子关系抵消
       if (
         (a === "s" && (b === "f" || b === "m")) ||
@@ -1225,17 +1269,17 @@ function repeatStr(s, n) {
 }
 
 function findResult(isMale, pathTokens) {
-  if (pathTokens.join('-') === 'f-d-h' || pathTokens.join('-') === 'm-d-h') {
-    return isMale ? '姐夫/妹夫' : '老公/姐夫/妹夫';
+  if (pathTokens.join("-") === "f-d-h" || pathTokens.join("-") === "m-d-h") {
+    return isMale ? "姐夫/妹夫" : "老公/姐夫/妹夫";
   }
-  if (pathTokens.join('-') === 'f-s-w' || pathTokens.join('-') === 'm-s-w') {
-    return isMale ? '老婆/嫂子/弟媳' : '嫂子/弟媳';
+  if (pathTokens.join("-") === "f-s-w" || pathTokens.join("-") === "m-s-w") {
+    return isMale ? "老婆/嫂子/弟媳" : "嫂子/弟媳";
   }
-  if (pathTokens.join('-') === 'f-s' || pathTokens.join('-') === 'm-s') {
-    return isMale ? '我/哥哥/弟弟' : '哥哥/弟弟';
+  if (pathTokens.join("-") === "f-s" || pathTokens.join("-") === "m-s") {
+    return isMale ? "我/哥哥/弟弟" : "哥哥/弟弟";
   }
-  if (pathTokens.join('-') === 'f-d' || pathTokens.join('-') === 'm-d') {
-    return isMale ? '姐姐/妹妹' : '我/姐姐/妹妹';
+  if (pathTokens.join("-") === "f-d" || pathTokens.join("-") === "m-d") {
+    return isMale ? "姐姐/妹妹" : "我/姐姐/妹妹";
   }
   const sex = isMale ? "male" : "female";
   // 兄弟姐妹相互抵消的歧义：父/母 + 兄/弟/姐/妹 + 兄/弟/姐/妹
@@ -1383,8 +1427,10 @@ function findReverseResult(isMale, pathTokens) {
 
   // 长度为2的关系链
   if (norm.length === 2) {
-    if ((a === "ob" || a === "yb") && (b === "s" || b === "d")) return male ? "伯伯/叔叔" : "姑姑";
-    if ((a === "os" || a === "ys") && (b === "s" || b === "d")) return male ? "舅舅" : "姨妈/小姨";
+    if ((a === "ob" || a === "yb") && (b === "s" || b === "d"))
+      return male ? "伯伯/叔叔" : "姑姑";
+    if ((a === "os" || a === "ys") && (b === "s" || b === "d"))
+      return male ? "舅舅" : "姨妈/小姨";
     if (a === "f" && (b === "ob" || b === "yb" || b === "os" || b === "ys")) {
       return male ? "侄子" : "侄女";
     }
@@ -1395,13 +1441,14 @@ function findReverseResult(isMale, pathTokens) {
       return isMale ? "外孙子" : "外孙女";
     if (a === "w" && (b === "f" || b === "m")) return "女婿";
     if (a === "h" && (b === "f" || b === "m")) return "儿媳";
-    if ((a === "os" || a === "ys") && b === "h") return male ? "内兄/内弟" : "大姨子/小姨子";
+    if ((a === "os" || a === "ys") && b === "h")
+      return male ? "内兄/内弟" : "大姨子/小姨子";
     if ((a === "ob" || a === "yb") && b === "w")
       return male ? "大伯子/小叔子" : "大姑子/小姑子";
-    if (a === 's' && b === 'w') return male ? '公公' : '婆婆';
-    if (a === 'd' && b === 'h') return male ? '岳父' : '岳母';
-    if (a === 's' && (b === 's' || b === 'd')) return male ? '爷爷' : '奶奶';
-    if (a === 'd' && (b === 's' || b === 'd')) return male ? '外公' : '外婆';
+    if (a === "s" && b === "w") return male ? "公公" : "婆婆";
+    if (a === "d" && b === "h") return male ? "岳父" : "岳母";
+    if (a === "s" && (b === "s" || b === "d")) return male ? "爷爷" : "奶奶";
+    if (a === "d" && (b === "s" || b === "d")) return male ? "外公" : "外婆";
   }
 
   return "未收录的关系（待完善）";
