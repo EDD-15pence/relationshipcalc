@@ -922,7 +922,7 @@ const relationshipMappings = [
   { path: ["f", "yb", "h"], name: "叔父的老公", gender: "both" },
   { path: ["f", "yb", "ob"], name: "叔父的哥哥", gender: "both" },
   { path: ["f", "yb", "os"], name: "叔父的姐姐", gender: "both" },
-  { path: ["f", "yb", "w"], name: "叔父的老婆", gender: "both" },
+  { path: ["f", "yb", "w"], name: "婶婶", gender: "both" },
   { path: ["f", "yb", "yb"], name: "叔父的弟弟", gender: "both" },
   { path: ["f", "yb", "ys"], name: "叔父的妹妹", gender: "both" },
   { path: ["f", "ys", "h"], name: "姑父", gender: "both" },
@@ -938,10 +938,10 @@ const relationshipMappings = [
   { path: ["m", "ob", "h"], name: "舅舅的老公", gender: "both" },
   { path: ["m", "ob", "ob"], name: "舅舅的哥哥", gender: "both" },
   { path: ["m", "ob", "os"], name: "舅舅的姐姐", gender: "both" },
-  { path: ["m", "ob", "w"], name: "舅舅的老婆", gender: "both" },
+  { path: ["m", "ob", "w"], name: "舅妈", gender: "both" },
   { path: ["m", "ob", "yb"], name: "舅舅的弟弟", gender: "both" },
   { path: ["m", "ob", "ys"], name: "舅舅的妹妹", gender: "both" },
-  { path: ["m", "os", "h"], name: "姨妈的老公", gender: "both" },
+  { path: ["m", "os", "h"], name: "姨夫", gender: "both" },
   { path: ["m", "os", "ob"], name: "姨妈的哥哥", gender: "both" },
   { path: ["m", "os", "os"], name: "姨妈的姐姐", gender: "both" },
   { path: ["m", "os", "w"], name: "姨妈的老婆", gender: "both" },
@@ -950,10 +950,10 @@ const relationshipMappings = [
   { path: ["m", "yb", "h"], name: "舅舅的老公", gender: "both" },
   { path: ["m", "yb", "ob"], name: "舅舅的哥哥", gender: "both" },
   { path: ["m", "yb", "os"], name: "舅舅的姐姐", gender: "both" },
-  { path: ["m", "yb", "w"], name: "舅舅的老婆", gender: "both" },
+  { path: ["m", "yb", "w"], name: "舅妈", gender: "both" },
   { path: ["m", "yb", "yb"], name: "舅舅的弟弟", gender: "both" },
   { path: ["m", "yb", "ys"], name: "舅舅的妹妹", gender: "both" },
-  { path: ["m", "ys", "h"], name: "姨妈的老公", gender: "both" },
+  { path: ["m", "ys", "h"], name: "姨夫", gender: "both" },
   { path: ["m", "ys", "ob"], name: "姨妈的哥哥", gender: "both" },
   { path: ["m", "ys", "os"], name: "姨妈的姐姐", gender: "both" },
   { path: ["m", "ys", "w"], name: "姨妈的老婆", gender: "both" },
@@ -1225,6 +1225,18 @@ function repeatStr(s, n) {
 }
 
 function findResult(isMale, pathTokens) {
+  if (pathTokens.join('-') === 'f-d-h' || pathTokens.join('-') === 'm-d-h') {
+    return isMale ? '姐夫/妹夫' : '老公/姐夫/妹夫';
+  }
+  if (pathTokens.join('-') === 'f-s-w' || pathTokens.join('-') === 'm-s-w') {
+    return isMale ? '老婆/嫂子/弟媳' : '嫂子/弟媳';
+  }
+  if (pathTokens.join('-') === 'f-s' || pathTokens.join('-') === 'm-s') {
+    return isMale ? '我/哥哥/弟弟' : '哥哥/弟弟';
+  }
+  if (pathTokens.join('-') === 'f-d' || pathTokens.join('-') === 'm-d') {
+    return isMale ? '姐姐/妹妹' : '我/姐姐/妹妹';
+  }
   const sex = isMale ? "male" : "female";
   // 兄弟姐妹相互抵消的歧义：父/母 + 兄/弟/姐/妹 + 兄/弟/姐/妹
   // 例如：妈妈-弟弟-姐姐 → 可能是 妈妈 本人，或 妈妈的姐妹（姨妈/小姨）
@@ -1371,6 +1383,8 @@ function findReverseResult(isMale, pathTokens) {
 
   // 长度为2的关系链
   if (norm.length === 2) {
+    if ((a === "ob" || a === "yb") && (b === "s" || b === "d")) return male ? "伯伯/叔叔" : "姑姑";
+    if ((a === "os" || a === "ys") && (b === "s" || b === "d")) return male ? "舅舅" : "姨妈/小姨";
     if (a === "f" && (b === "ob" || b === "yb" || b === "os" || b === "ys")) {
       return male ? "侄子" : "侄女";
     }
@@ -1381,9 +1395,13 @@ function findReverseResult(isMale, pathTokens) {
       return isMale ? "外孙子" : "外孙女";
     if (a === "w" && (b === "f" || b === "m")) return "女婿";
     if (a === "h" && (b === "f" || b === "m")) return "儿媳";
-    if ((a === "os" || a === "ys") && b === "h") return male ? "内弟" : "弟妹";
+    if ((a === "os" || a === "ys") && b === "h") return male ? "内兄/内弟" : "大姨子/小姨子";
     if ((a === "ob" || a === "yb") && b === "w")
-      return male ? "内兄/内弟" : "嫂子/弟媳";
+      return male ? "大伯子/小叔子" : "大姑子/小姑子";
+    if (a === 's' && b === 'w') return male ? '公公' : '婆婆';
+    if (a === 'd' && b === 'h') return male ? '岳父' : '岳母';
+    if (a === 's' && (b === 's' || b === 'd')) return male ? '爷爷' : '奶奶';
+    if (a === 'd' && (b === 's' || b === 'd')) return male ? '外公' : '外婆';
   }
 
   return "未收录的关系（待完善）";
