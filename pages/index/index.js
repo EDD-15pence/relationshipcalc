@@ -1536,10 +1536,35 @@ Page({
   onToggleTheme() {
     this.setData({ isDark: !this.data.isDark });
   },
+  // 分享给朋友
+  onShareAppMessage() {
+    const { formulaText, displayResult, isMale } = this.data;
+    let shareTitle = "亲属称呼换算 - 快速计算亲属关系";
+    let sharePath = "/pages/index/index";
+    console.log('分享给朋友')
+    // 如果有计算结果，在分享内容中包含
+    if (formulaText && displayResult) {
+      shareTitle = `${formulaText} = ${displayResult}`;
+      // 可以将当前状态编码到分享路径中
+      const state = encodeURIComponent(
+        JSON.stringify({
+          expr: this.data.expr,
+          isMale: this.data.isMale,
+          reverseMode: this.data.reverseMode,
+        })
+      );
+      sharePath += `?state=${state}`;
+    }
 
+    return {
+      title: shareTitle,
+      path: sharePath,
+    };
+  },
   // 手动触发分享
   onShare() {
     const { formulaText, displayResult } = this.data;
+    console.log('分享按钮被点击') // 调试日志
     if (formulaText && displayResult) {
       wx.showModal({
         title: "分享计算结果",
@@ -1547,13 +1572,21 @@ Page({
         confirmText: "分享",
         cancelText: "取消",
         success: (res) => {
+          console.log('res', res);
+
           if (res.confirm) {
             // 触发分享
-            wx.showShareMenu({
-              withShareTicket: true,
-              menus: ["shareAppMessage", "shareTimeline"],
-            });
+            // wx.showShareMenu({
+            //   withShareTicket: true,
+            //   menus: ["shareAppMessage", "shareTimeline"],
+            // });
+            onShareAppMessage();
+            console.log('分享成功')
           }
+        },
+        fail: (err) => {
+          console.log('err', err);
+
         },
       });
     } else {
@@ -1586,31 +1619,7 @@ Page({
     this.setData({ formulaText, displayResult, disableH, disableW });
   },
 
-  // 分享给朋友
-  onShareAppMessage() {
-    const { formulaText, displayResult, isMale } = this.data;
-    let shareTitle = "亲属称呼换算 - 快速计算亲属关系";
-    let sharePath = "/pages/index/index";
 
-    // 如果有计算结果，在分享内容中包含
-    if (formulaText && displayResult) {
-      shareTitle = `${formulaText} = ${displayResult}`;
-      // 可以将当前状态编码到分享路径中
-      const state = encodeURIComponent(
-        JSON.stringify({
-          expr: this.data.expr,
-          isMale: this.data.isMale,
-          reverseMode: this.data.reverseMode,
-        })
-      );
-      sharePath += `?state=${state}`;
-    }
-
-    return {
-      title: shareTitle,
-      path: sharePath,
-    };
-  },
 
   // 分享到朋友圈
   onShareTimeline() {
