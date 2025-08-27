@@ -17,7 +17,10 @@
     <view class="formula-row">
       <text class="formula">{{formulaText}}</text>
     </view>
-    <view class="result-large">{{displayResult}}</view>
+    <view class="result-row">
+      <text class="result-large">{{displayResult}}</text>
+      <image src="/images/speaker.svg" class="speaker-icon" bindtap="onPlayAudio" wx:if="{{displayResult}}"></image>
+    </view>
   </view>
 
   <view class="spacer"></view>

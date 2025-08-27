@@ -1267,16 +1267,22 @@ function repeatStr(s, n) {
 
 function findResult(isMale, pathTokens) {
   if (pathTokens.join("-") === "f-d-h" || pathTokens.join("-") === "m-d-h") {
-    return isMale ? "姐夫/妹夫" : "老公/姐夫/妹夫";
+    return {
+      name: isMale ? "姐夫/妹夫" : "老公/姐夫/妹夫",
+      path: pathTokens,
+    };
   }
   if (pathTokens.join("-") === "f-s-w" || pathTokens.join("-") === "m-s-w") {
-    return isMale ? "老婆/嫂子/弟媳" : "嫂子/弟媳";
+    return {
+      name: isMale ? "老婆/嫂子/弟媳" : "嫂子/弟媳",
+      path: pathTokens,
+    };
   }
   if (pathTokens.join("-") === "f-s" || pathTokens.join("-") === "m-s") {
-    return isMale ? "我/哥哥/弟弟" : "哥哥/弟弟";
+    return { name: isMale ? "我/哥哥/弟弟" : "哥哥/弟弟", path: pathTokens };
   }
   if (pathTokens.join("-") === "f-d" || pathTokens.join("-") === "m-d") {
-    return isMale ? "姐姐/妹妹" : "我/姐姐/妹妹";
+    return { name: isMale ? "姐姐/妹妹" : "我/姐姐/妹妹", path: pathTokens };
   }
   const sex = isMale ? "male" : "female";
   // 兄弟姐妹相互抵消的歧义：父/母 + 兄/弟/姐/妹 + 兄/弟/姐/妹
@@ -1293,10 +1299,13 @@ function findResult(isMale, pathTokens) {
     const lastIsMale = pathTokens[2] === "ob" || pathTokens[2] === "yb";
     if (parent === "m") {
       // 妈妈 + (…)+ (哥哥/弟弟) → 妈妈/舅舅；(姐姐/妹妹) → 妈妈/姨妈/小姨
-      return lastIsMale ? "舅舅" : "妈妈/姨妈/小姨";
+      return { name: lastIsMale ? "舅舅" : "妈妈/姨妈/小姨", path: ["m", "ob"] }; // Simplified path
     } else {
       // 爸爸 + (…)+ (哥哥/弟弟) → 爸爸/伯伯/叔叔；(姐姐/妹妹) → 姑姑
-      return lastIsMale ? "爸爸/伯伯/叔叔" : "姑姑";
+      return {
+        name: lastIsMale ? "爸爸/伯伯/叔叔" : "姑姑",
+        path: ["f", "ob"],
+      }; // Simplified path
     }
   }
 
@@ -1325,11 +1334,12 @@ function findResult(isMale, pathTokens) {
   }
 
   const direct = resultMap[key(sex, norm)];
-  if (direct) return direct;
-  if (norm.length === 0) return "自己";
-  if (norm.every((t) => t === "f" || t === "m")) return buildAncestorName(norm);
+  if (direct) return { name: direct, path: norm };
+  if (norm.length === 0) return { name: "自己", path: [] };
+  if (norm.every((t) => t === "f" || t === "m"))
+    return { name: buildAncestorName(norm), path: norm };
   if (norm.every((t) => t === "s" || t === "d"))
-    return buildDescendantName(norm);
+    return { name: buildDescendantName(norm), path: norm };
 
   // 祖辈链 + 配偶：如 爸爸-爸爸-老婆 => 奶奶
   if (norm[norm.length - 1] === "w" || norm[norm.length - 1] === "h") {
@@ -1338,7 +1348,7 @@ function findResult(isMale, pathTokens) {
       const toggled = prefix.slice();
       const lastIdx = toggled.length - 1;
       toggled[lastIdx] = toggled[lastIdx] === "f" ? "m" : "f";
-      return buildAncestorName(toggled);
+      return { name: buildAncestorName(toggled), path: toggled };
     }
   }
 
@@ -1352,17 +1362,22 @@ function findResult(isMale, pathTokens) {
       sib = norm[1],
       spouse = norm[2];
     if (side === "f") {
-      if (sib === "ob") return spouse === "w" ? "伯母" : "伯伯";
-      if (sib === "yb") return spouse === "w" ? "婶婶" : "叔叔";
-      if (sib === "os" || sib === "ys") return spouse === "h" ? "姑父" : "姑姑";
+      if (sib === "ob")
+        return { name: spouse === "w" ? "伯母" : "伯伯", path: norm };
+      if (sib === "yb")
+        return { name: spouse === "w" ? "婶婶" : "叔叔", path: norm };
+      if (sib === "os" || sib === "ys")
+        return { name: spouse === "h" ? "姑父" : "姑姑", path: norm };
     } else {
-      if (sib === "ob" || sib === "yb") return spouse === "w" ? "舅妈" : "舅舅";
-      if (sib === "os" || sib === "ys") return spouse === "h" ? "姨夫" : "姨妈";
+      if (sib === "ob" || sib === "yb")
+        return { name: spouse === "w" ? "舅妈" : "舅舅", path: norm };
+      if (sib === "os" || sib === "ys")
+        return { name: spouse === "h" ? "姨夫" : "姨妈", path: norm };
     }
   }
   // 回退：将 token 路径转换为可读的中文描述（例如 "妈妈的弟弟的儿子"），避免返回未收录提示
   const readable = norm.map((t) => tokenToLabel[t] || t).join("的");
-  return readable;
+  return { name: readable, path: norm };
 }
 
 function findReverseResult(isMale, pathTokens) {
@@ -1467,6 +1482,7 @@ Page({
     expr: [],
     formulaText: "",
     displayResult: "",
+    resultAudioPath: "", // 用于播放音频
     reverseMode: false,
     isDark: false,
     disableH: false,
@@ -1604,16 +1620,31 @@ Page({
       this.data.reverseMode
     );
     let displayResult = "";
+    let resultAudioPath = "";
     if (tokens.length > 0) {
-      displayResult = this.data.reverseMode
-        ? findReverseResult(this.data.isMale, tokens)
-        : findResult(this.data.isMale, tokens);
+      if (this.data.reverseMode) {
+        displayResult = findReverseResult(this.data.isMale, tokens);
+      } else {
+        const result = findResult(this.data.isMale, tokens);
+        displayResult = result.name;
+        if (result.path) {
+          resultAudioPath = `/assets/audio/zh-cn/${result.path.join("")}.wav`;
+        }
+      }
     }
     // 末端性别判断：用于禁用老公/老婆键
     const tailGender = inferTailGender(tokens, this.data.isMale);
     const disableH = tailGender === "male";
     const disableW = tailGender === "female";
-    this.setData({ formulaText, displayResult, disableH, disableW });
+    this.setData({ formulaText, displayResult, resultAudioPath, disableH, disableW });
+  },
+
+  onPlayAudio() {
+    if (this.data.resultAudioPath) {
+      const innerAudioContext = wx.createInnerAudioContext();
+      innerAudioContext.src = this.data.resultAudioPath;
+      innerAudioContext.play();
+    }
   },
 
 

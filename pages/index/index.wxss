@@ -70,6 +70,19 @@
   color: #6b6b6b;
   min-height: 64rpx;
 }
+.result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20rpx;
+}
+
+.speaker-icon {
+  width: 48rpx;
+  height: 48rpx;
+  margin-left: 20rpx;
+  opacity: 0.7;
+}
 .spacer {
   flex: 1;
 }
