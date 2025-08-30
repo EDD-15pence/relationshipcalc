@@ -1,1 +1,4 @@
 project.config.json
+*.log
+# script
+scripts/

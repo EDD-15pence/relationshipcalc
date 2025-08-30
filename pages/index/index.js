@@ -1299,7 +1299,10 @@ function findResult(isMale, pathTokens) {
     const lastIsMale = pathTokens[2] === "ob" || pathTokens[2] === "yb";
     if (parent === "m") {
       // 妈妈 + (…)+ (哥哥/弟弟) → 妈妈/舅舅；(姐姐/妹妹) → 妈妈/姨妈/小姨
-      return { name: lastIsMale ? "舅舅" : "妈妈/姨妈/小姨", path: ["m", "ob"] }; // Simplified path
+      return {
+        name: lastIsMale ? "舅舅" : "妈妈/姨妈/小姨",
+        path: ["m", "ob"],
+      }; // Simplified path
     } else {
       // 爸爸 + (…)+ (哥哥/弟弟) → 爸爸/伯伯/叔叔；(姐姐/妹妹) → 姑姑
       return {
@@ -1488,7 +1491,33 @@ Page({
     disableH: false,
     disableW: false,
   },
+  loadCdnMap(urls, index) {
+    if (index >= urls.length) {
+      console.error("❌ 所有 CDN 映射加载失败");
+      return;
+    }
+
+    wx.request({
+      url: urls[index],
+      success: (res) => {
+        this.setData({ cdnMap: res.data });
+        console.log("✅ CDN 映射加载完成，使用 URL:", urls[index]);
+      },
+      fail: (err) => {
+        console.warn("⚠️ CDN 请求失败，尝试下一个:", urls[index], err);
+        this.loadCdnMap(urls, index + 1);
+      },
+    });
+  },
   onLoad(options) {
+    const cdnUrls = [
+      "https://ghfast.top/https://raw.githubusercontent.com/EDD-15pence/relationship-audio/main/cdn_map.json",
+      "https://raw.fastgit.org/EDD-15pence/relationship-audio/main/cdn_map.json",
+      "https://cdn.jsdelivr.net/gh/EDD-15pence/relationship-audio@main/cdn_map.json",
+    ];
+
+    this.loadCdnMap(cdnUrls, 0);
+
     // 处理分享链接打开
     if (options.state) {
       try {
@@ -1554,7 +1583,7 @@ Page({
     const { formulaText, displayResult, isMale } = this.data;
     let shareTitle = "亲属称呼换算 - 快速计算亲属关系";
     let sharePath = "/pages/index/index";
-    console.log('分享给朋友')
+    console.log("分享给朋友");
     // 如果有计算结果，在分享内容中包含
     if (formulaText && displayResult) {
       shareTitle = `${formulaText} = ${displayResult}`;
@@ -1577,7 +1606,7 @@ Page({
   // 手动触发分享
   onShare() {
     const { formulaText, displayResult } = this.data;
-    console.log('分享按钮被点击') // 调试日志
+    console.log("分享按钮被点击"); // 调试日志
     if (formulaText && displayResult) {
       wx.showModal({
         title: "分享计算结果",
@@ -1585,7 +1614,7 @@ Page({
         confirmText: "分享",
         cancelText: "取消",
         success: (res) => {
-          console.log('res', res);
+          console.log("res", res);
 
           if (res.confirm) {
             // 触发分享
@@ -1594,12 +1623,11 @@ Page({
             //   menus: ["shareAppMessage", "shareTimeline"],
             // });
             onShareAppMessage();
-            console.log('分享成功')
+            console.log("分享成功");
           }
         },
         fail: (err) => {
-          console.log('err', err);
-
+          console.log("err", err);
         },
       });
     } else {
@@ -1628,7 +1656,7 @@ Page({
         const result = findResult(this.data.isMale, tokens);
         displayResult = result.name;
         if (result.path) {
-          resultAudioPath = `/assets/audio/zh-cn/${result.path.join("")}.wav`;
+          resultAudioPath = `${result.path.join("")}`;
         }
       }
     }
@@ -1636,18 +1664,60 @@ Page({
     const tailGender = inferTailGender(tokens, this.data.isMale);
     const disableH = tailGender === "male";
     const disableW = tailGender === "female";
-    this.setData({ formulaText, displayResult, resultAudioPath, disableH, disableW });
+    this.setData({
+      formulaText,
+      displayResult,
+      resultAudioPath,
+      disableH,
+      disableW,
+    });
   },
+
+  // onPlayAudio() {
+  //   if (this.data.resultAudioPath) {
+  //     const innerAudioContext = wx.createInnerAudioContext();
+  //     innerAudioContext.src = this.data.resultAudioPath;
+  //     innerAudioContext.play();
+  //   }
+  // },
 
   onPlayAudio() {
-    if (this.data.resultAudioPath) {
-      const innerAudioContext = wx.createInnerAudioContext();
-      innerAudioContext.src = this.data.resultAudioPath;
-      innerAudioContext.play();
-    }
+
+    const { resultAudioPath, cdnMap } = this.data;
+    console.log(
+      this.data,
+      "resultAudioPath:",
+      resultAudioPath,
+      "cdnMap:",
+      cdnMap
+    );
+    if (!resultAudioPath || !cdnMap) return;
+
+    const audioUrls = cdnMap[resultAudioPath];
+    if (!audioUrls) return;
+
+    const urls = [audioUrls.ghfast, audioUrls.jsdelivr, audioUrls.raw]; // 播放优先顺序
+
+    const tryPlay = (index) => {
+      if (index >= urls.length) {
+        console.error("❌ 所有 CDN 播放失败");
+        return;
+      }
+
+      const audioCtx = wx.createInnerAudioContext();
+      audioCtx.autoplay = true;
+      audioCtx.src = urls[index];
+
+      audioCtx.onError((err) => {
+        console.warn(`⚠️ 播放失败，尝试下一个 URL (${index + 1}):`, err);
+        tryPlay(index + 1);
+      });
+
+      audioCtx.play();
+    };
+
+    tryPlay(0); // 从第一个 URL 开始播放
   },
-
-
 
   // 分享到朋友圈
   onShareTimeline() {
