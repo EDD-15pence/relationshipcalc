@@ -1145,6 +1145,26 @@ if (typeof module !== "undefined" && module.exports) {
   }
 }
 
+const nameToTokenPath = {};
+relationshipMappings.forEach(mapping => {
+    if (mapping.name && mapping.path) {
+        const name = mapping.name;
+        // 对于 "堂哥/堂弟" 这种，拆开来单独映射
+        if (name.includes('/')) {
+            const names = name.split('/');
+            names.forEach(n => {
+                if (!nameToTokenPath[n] || nameToTokenPath[n].length > mapping.path.length) {
+                    nameToTokenPath[n] = mapping.path;
+                }
+            });
+        } else {
+            if (!nameToTokenPath[name] || nameToTokenPath[name].length > mapping.path.length) {
+                nameToTokenPath[name] = mapping.path;
+            }
+        }
+    }
+});
+
 const resultMap = {};
 
 // 处理亲属关系映射
@@ -1474,8 +1494,8 @@ function buildFormulaText(exprLabels, isMale, reverseMode) {
   if (!reverseMode) return "我的" + exprLabels.join("的");
   const tokens = exprLabels.map((lbl) => labelToToken[lbl]).filter(Boolean);
   const forward = findResult(isMale, tokens);
-  if (forward && forward !== "未收录的关系（待完善）")
-    return `${forward}称呼我`;
+  if (forward && forward.name && forward.name !== "未收录的关系（待完善）")
+    return `${forward.name}称呼我`;
   return "称呼我";
 }
 
@@ -1652,6 +1672,11 @@ Page({
     if (tokens.length > 0) {
       if (this.data.reverseMode) {
         displayResult = findReverseResult(this.data.isMale, tokens);
+        const mainResult = displayResult.split('/')[0];
+        const resultPath = nameToTokenPath[mainResult];
+        if (resultPath) {
+          resultAudioPath = resultPath.join("");
+        }
       } else {
         const result = findResult(this.data.isMale, tokens);
         displayResult = result.name;
