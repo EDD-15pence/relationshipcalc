@@ -471,13 +471,13 @@ const relationshipMappings = [
   { path: ["ob", "h", "os"], name: "哥哥的老公的姐姐", gender: "both" },
   { path: ["ob", "h", "yb"], name: "哥哥的老公的弟弟", gender: "both" },
   { path: ["ob", "h", "ys"], name: "哥哥的老公的妹妹", gender: "both" },
-  { path: ["ob", "m", "d"], name: "妈妈的女儿", gender: "both" },
+  { path: ["ob", "m", "d"], name: "姐姐/妹妹", gender: "both" },
   { path: ["ob", "m", "f"], name: "外公", gender: "both" },
   { path: ["ob", "m", "h"], name: "爸爸", gender: "both" },
   { path: ["ob", "m", "m"], name: "外婆", gender: "both" },
   { path: ["ob", "m", "ob"], name: "舅舅", gender: "both" },
   { path: ["ob", "m", "os"], name: "姨妈", gender: "both" },
-  { path: ["ob", "m", "s"], name: "妈妈的儿子", gender: "both" },
+  { path: ["ob", "m", "s"], name: "哥哥/弟弟", gender: "both" },
   { path: ["ob", "m", "w"], name: "妈妈的老婆", gender: "both" },
   { path: ["ob", "m", "ys"], name: "小姨", gender: "both" },
   { path: ["ob", "ob", "f"], name: "伯父", gender: "both" },
@@ -533,7 +533,7 @@ const relationshipMappings = [
   { path: ["os", "d", "ys"], name: "外曾孙女", gender: "both" },
   { path: ["os", "f", "d"], name: "爸爸的女儿", gender: "both" },
   { path: ["os", "f", "f"], name: "爷爷", gender: "both" },
-  { path: ["os", "f", "h"], name: "继父", gender: "both" },
+  { path: ["os", "f", "h"], name: "爸爸的老公", gender: "both" },
   { path: ["os", "f", "m"], name: "奶奶", gender: "both" },
   { path: ["os", "f", "ob"], name: "伯伯", gender: "both" },
   { path: ["os", "f", "os"], name: "姑姑", gender: "both" },
@@ -548,13 +548,13 @@ const relationshipMappings = [
   { path: ["os", "h", "os"], name: "姐夫姐", gender: "both" },
   { path: ["os", "h", "yb"], name: "姐夫弟", gender: "both" },
   { path: ["os", "h", "ys"], name: "姐夫妹", gender: "both" },
-  { path: ["os", "m", "d"], name: "妈妈的女儿", gender: "both" },
+  { path: ["os", "m", "d"], name: "姐姐/妹妹", gender: "both" },
   { path: ["os", "m", "f"], name: "外公", gender: "both" },
   { path: ["os", "m", "h"], name: "爸爸", gender: "both" },
   { path: ["os", "m", "m"], name: "外婆", gender: "both" },
   { path: ["os", "m", "ob"], name: "舅舅", gender: "both" },
   { path: ["os", "m", "os"], name: "姨妈", gender: "both" },
-  { path: ["os", "m", "s"], name: "妈妈的儿子", gender: "both" },
+  { path: ["os", "m", "s"], name: "哥哥/弟弟", gender: "both" },
   { path: ["os", "m", "w"], name: "妈妈的老婆", gender: "both" },
   { path: ["os", "ob", "d"], name: "侄女", gender: "both" },
   { path: ["os", "ob", "f"], name: "伯父", gender: "both" },
@@ -776,13 +776,13 @@ const relationshipMappings = [
   { path: ["yb", "h", "os"], name: "弟弟的老公的姐姐", gender: "both" },
   { path: ["yb", "h", "yb"], name: "弟弟的老公的弟弟", gender: "both" },
   { path: ["yb", "h", "ys"], name: "弟弟的老公的妹妹", gender: "both" },
-  { path: ["yb", "m", "d"], name: "妈妈的女儿", gender: "both" },
+  { path: ["yb", "m", "d"], name: "姐姐/妹妹", gender: "both" },
   { path: ["yb", "m", "f"], name: "外公", gender: "both" },
   { path: ["yb", "m", "h"], name: "爸爸", gender: "both" },
   { path: ["yb", "m", "m"], name: "外婆", gender: "both" },
   { path: ["yb", "m", "ob"], name: "舅舅", gender: "both" },
   { path: ["yb", "m", "os"], name: "姨妈", gender: "both" },
-  { path: ["yb", "m", "s"], name: "妈妈的儿子", gender: "both" },
+  { path: ["yb", "m", "s"], name: "哥哥/弟弟", gender: "both" },
   { path: ["yb", "m", "w"], name: "妈妈的老婆", gender: "both" },
   { path: ["yb", "m", "yb"], name: "舅舅", gender: "both" },
   { path: ["yb", "m", "ys"], name: "小姨", gender: "both" },
@@ -854,13 +854,13 @@ const relationshipMappings = [
   { path: ["ys", "h", "os"], name: "妹夫的姐姐", gender: "both" },
   { path: ["ys", "h", "yb"], name: "妹夫的弟弟", gender: "both" },
   { path: ["ys", "h", "ys"], name: "妹夫的妹妹", gender: "both" },
-  { path: ["ys", "m", "d"], name: "妈妈的女儿", gender: "both" },
+  { path: ["ys", "m", "d"], name: "姐姐/妹妹", gender: "both" },
   { path: ["ys", "m", "f"], name: "外公", gender: "both" },
   { path: ["ys", "m", "h"], name: "爸爸", gender: "both" },
   { path: ["ys", "m", "m"], name: "外婆", gender: "both" },
   { path: ["ys", "m", "ob"], name: "舅舅", gender: "both" },
   { path: ["ys", "m", "os"], name: "姨妈", gender: "both" },
-  { path: ["ys", "m", "s"], name: "妈妈的儿子", gender: "both" },
+  { path: ["ys", "m", "s"], name: "哥哥/弟弟", gender: "both" },
   { path: ["ys", "m", "w"], name: "妈妈的老婆", gender: "both" },
   { path: ["ys", "m", "yb"], name: "舅舅", gender: "both" },
   { path: ["ys", "m", "ys"], name: "小姨", gender: "both" },
@@ -1114,7 +1114,14 @@ if (typeof module !== "undefined" && module.exports) {
     const fs = require("fs");
     const path = require("path");
     const raw = fs.readFileSync(
-      path.join(__dirname, "..", "..", "missing-relations.txt"),
+      path.join(
+        __dirname,
+        "..",
+        "..",
+        "scripts",
+        "01-test",
+        "missing-relations.txt"
+      ),
       "utf8"
     );
     const VALID_LINE_RE =
@@ -1146,23 +1153,29 @@ if (typeof module !== "undefined" && module.exports) {
 }
 
 const nameToTokenPath = {};
-relationshipMappings.forEach(mapping => {
-    if (mapping.name && mapping.path) {
-        const name = mapping.name;
-        // 对于 "堂哥/堂弟" 这种，拆开来单独映射
-        if (name.includes('/')) {
-            const names = name.split('/');
-            names.forEach(n => {
-                if (!nameToTokenPath[n] || nameToTokenPath[n].length > mapping.path.length) {
-                    nameToTokenPath[n] = mapping.path;
-                }
-            });
-        } else {
-            if (!nameToTokenPath[name] || nameToTokenPath[name].length > mapping.path.length) {
-                nameToTokenPath[name] = mapping.path;
-            }
+relationshipMappings.forEach((mapping) => {
+  if (mapping.name && mapping.path) {
+    const name = mapping.name;
+    // 对于 "堂哥/堂弟" 这种，拆开来单独映射
+    if (name.includes("/")) {
+      const names = name.split("/");
+      names.forEach((n) => {
+        if (
+          !nameToTokenPath[n] ||
+          nameToTokenPath[n].length > mapping.path.length
+        ) {
+          nameToTokenPath[n] = mapping.path;
         }
+      });
+    } else {
+      if (
+        !nameToTokenPath[name] ||
+        nameToTokenPath[name].length > mapping.path.length
+      ) {
+        nameToTokenPath[name] = mapping.path;
+      }
     }
+  }
 });
 
 const resultMap = {};
@@ -1672,7 +1685,7 @@ Page({
     if (tokens.length > 0) {
       if (this.data.reverseMode) {
         displayResult = findReverseResult(this.data.isMale, tokens);
-        const mainResult = displayResult.split('/')[0];
+        const mainResult = displayResult.split("/")[0];
         const resultPath = nameToTokenPath[mainResult];
         if (resultPath) {
           resultAudioPath = resultPath.join("");
@@ -1707,7 +1720,6 @@ Page({
   // },
 
   onPlayAudio() {
-
     const { resultAudioPath, cdnMap } = this.data;
     console.log(
       this.data,
