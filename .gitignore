@@ -1,4 +1,6 @@
 project.config.json
 *.log
 # script
-scripts/
+# scripts/
+# backup
+*.backup.*
