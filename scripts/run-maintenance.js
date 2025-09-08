@@ -102,18 +102,28 @@ function main() {
     },
     {
       type: "node",
+      path: path.join(__dirname, "02-validate", "validate-missing.js"),
+      description: "步骤 2: 验证缺失关系",
+    },
+    {
+      type: "node",
       path: path.join(__dirname, "03-sync", "sync-missing-to-index.js"),
-      description: "步骤 2: 同步缺失关系到代码",
+      description: "步骤 3: 同步缺失关系到代码",
     },
     {
       type: "node",
       path: path.join(__dirname, "04-normalize", "run-normalize.js"),
-      description: "步骤 3: 规范化关系名称",
+      description: "步骤 4: 规范化关系名称",
+    },
+    {
+      type: "python",
+      path: path.join(__dirname, "data", "extract_relations.py"),
+      description: "步骤 5: 提取关系到 relations.json",
     },
     {
       type: "python",
       path: path.join(__dirname, "05-audio", "upload_to_github.py"),
-      description: "步骤 4: 生成音频并上传到 GitHub",
+      description: "步骤 6: 生成音频并上传到 GitHub",
     },
   ];
 
@@ -157,8 +167,10 @@ function main() {
 
   log(`\n${colors.bright}${colors.yellow}📋 完成的任务:${colors.reset}`);
   log(`${colors.green}  • 测试关系计算逻辑${colors.reset}`);
+  log(`${colors.green}  • 验证缺失关系${colors.reset}`);
   log(`${colors.green}  • 同步缺失关系到代码${colors.reset}`);
   log(`${colors.green}  • 规范化关系名称${colors.reset}`);
+  log(`${colors.green}  • 提取关系到 relations.json${colors.reset}`);
   log(`${colors.green}  • 生成音频并上传到 GitHub${colors.reset}`);
 
   log(

@@ -201,6 +201,8 @@ const relationshipMappings = [
   { path: ["s", "s"], name: "孙子", gender: "both" },
   // 以下为自动补充的缺失关系（已修正）
   // 自动同步自 missing-relations.txt，共 830 条新条目（去重后）
+  { path: ["d", "s"], name: "外孙", gender: "both" },
+  { path: ["d", "d"], name: "外孙女", gender: "both" },
   { path: ["d", "d", "h"], name: "外孙女婿", gender: "both" },
   { path: ["d", "d", "ob"], name: "外孙女的哥哥", gender: "both" },
   { path: ["d", "d", "os"], name: "外孙女的姐姐", gender: "both" },
