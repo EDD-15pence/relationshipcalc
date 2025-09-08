@@ -19,7 +19,7 @@
     </view>
     <view class="result-row">
       <text class="result-large">{{displayResult}}</text>
-      <image src="/images/speaker.svg" class="speaker-icon" bindtap="onPlayAudio" wx:if="{{displayResult}}"></image>
+      <image src="/images/speaker.svg" class="speaker-icon {{isAudioPlaying ? 'speaker-disabled' : ''}}" bindtap="onPlayAudio" wx:if="{{displayResult}}"></image>
     </view>
   </view>
 

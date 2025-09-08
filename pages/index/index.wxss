@@ -82,6 +82,12 @@
   height: 48rpx;
   margin-left: 20rpx;
   opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.speaker-disabled {
+  opacity: 0.3 !important;
+  pointer-events: none;
 }
 .spacer {
   flex: 1;

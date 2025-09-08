@@ -1525,6 +1525,7 @@ Page({
     isDark: false,
     disableH: false,
     disableW: false,
+    isAudioPlaying: false, // 音频播放状态
   },
   loadCdnMap(urls, index) {
     if (index >= urls.length) {
@@ -1722,7 +1723,11 @@ Page({
   // },
 
   onPlayAudio() {
-    const { resultAudioPath, cdnMap } = this.data;
+    const { resultAudioPath, cdnMap, isAudioPlaying } = this.data;
+
+    // 如果正在播放，直接返回
+    if (isAudioPlaying) return;
+
     console.log(
       this.data,
       "resultAudioPath:",
@@ -1735,11 +1740,20 @@ Page({
     const audioUrls = cdnMap[resultAudioPath];
     if (!audioUrls) return;
 
+    // 设置播放状态为true，禁用按钮
+    this.setData({
+      isAudioPlaying: true,
+    });
+
     const urls = [audioUrls.ghfast, audioUrls.jsdelivr, audioUrls.raw]; // 播放优先顺序
 
     const tryPlay = (index) => {
       if (index >= urls.length) {
         console.error("❌ 所有 CDN 播放失败");
+        // 播放失败，恢复按钮状态
+        this.setData({
+          isAudioPlaying: false,
+        });
         return;
       }
 
@@ -1749,7 +1763,26 @@ Page({
 
       audioCtx.onError((err) => {
         console.warn(`⚠️ 播放失败，尝试下一个 URL (${index + 1}):`, err);
+        audioCtx.destroy(); // 销毁当前音频上下文
         tryPlay(index + 1);
+      });
+
+      audioCtx.onEnded(() => {
+        console.log("✅ 音频播放完成");
+        // 播放完成，恢复按钮状态
+        this.setData({
+          isAudioPlaying: false,
+        });
+        audioCtx.destroy(); // 销毁音频上下文
+      });
+
+      audioCtx.onStop(() => {
+        console.log("⏹️ 音频播放停止");
+        // 播放停止，恢复按钮状态
+        this.setData({
+          isAudioPlaying: false,
+        });
+        audioCtx.destroy(); // 销毁音频上下文
       });
 
       audioCtx.play();
