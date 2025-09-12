@@ -122,8 +122,12 @@ function main() {
     },
     {
       type: "python",
-      path: path.join(__dirname, "05-audio", "upload_to_github.py"),
-      description: "步骤 6: 生成音频并上传到 GitHub",
+      path: path.join(
+        __dirname,
+        "05-audio",
+        "upload_to_github_multi_dialect.py"
+      ),
+      description: "步骤 6: 生成多方言音频并上传到 GitHub",
     },
   ];
 
@@ -171,7 +175,7 @@ function main() {
   log(`${colors.green}  • 同步缺失关系到代码${colors.reset}`);
   log(`${colors.green}  • 规范化关系名称${colors.reset}`);
   log(`${colors.green}  • 提取关系到 relations.json${colors.reset}`);
-  log(`${colors.green}  • 生成音频并上传到 GitHub${colors.reset}`);
+  log(`${colors.green}  • 生成多方言音频并上传到 GitHub${colors.reset}`);
 
   log(
     `\n${colors.bright}${colors.cyan}🚀 项目维护完成！音频文件已可通过 CDN 访问${colors.reset}`

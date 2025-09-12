@@ -1526,6 +1526,8 @@ Page({
     disableH: false,
     disableW: false,
     isAudioPlaying: false, // 音频播放状态
+    playingDialect: null, // 当前播放的方言
+    cdnMaps: {}, // 存储各方言的CDN映射
   },
   loadCdnMap(urls, index) {
     if (index >= urls.length) {
@@ -1536,8 +1538,18 @@ Page({
     wx.request({
       url: urls[index],
       success: (res) => {
-        this.setData({ cdnMap: res.data });
-        console.log("✅ CDN 映射加载完成，使用 URL:", urls[index]);
+        // 兼容单方言和多方言结构
+        if (res.data && typeof res.data === "object") {
+          // 检查是否为多方言结构
+          if (res.data["zh-cn"] || res.data["zh-yue"] || res.data["zh-min"]) {
+            this.setData({ cdnMaps: res.data });
+            console.log("✅ 多方言CDN映射加载完成，使用 URL:", urls[index]);
+          } else {
+            // 单方言结构，包装成多方言格式
+            this.setData({ cdnMaps: { "zh-cn": res.data } });
+            console.log("✅ 单方言CDN映射加载完成，使用 URL:", urls[index]);
+          }
+        }
       },
       fail: (err) => {
         console.warn("⚠️ CDN 请求失败，尝试下一个:", urls[index], err);
@@ -1547,9 +1559,9 @@ Page({
   },
   onLoad(options) {
     const cdnUrls = [
-      "https://ghfast.top/https://raw.githubusercontent.com/EDD-15pence/relationship-audio/main/cdn_map.json",
-      "https://raw.fastgit.org/EDD-15pence/relationship-audio/main/cdn_map.json",
-      "https://cdn.jsdelivr.net/gh/EDD-15pence/relationship-audio@main/cdn_map.json",
+      "https://ghfast.top/https://raw.githubusercontent.com/EDD-15pence/relationship-audio/main/cdn_map_unified.json",
+      "https://raw.fastgit.org/EDD-15pence/relationship-audio/main/cdn_map_unified.json",
+      "https://cdn.jsdelivr.net/gh/EDD-15pence/relationship-audio@main/cdn_map_unified.json",
     ];
 
     this.loadCdnMap(cdnUrls, 0);
@@ -1722,27 +1734,42 @@ Page({
   //   }
   // },
 
-  onPlayAudio() {
-    const { resultAudioPath, cdnMap, isAudioPlaying } = this.data;
+  onPlayAudio(e) {
+    const { resultAudioPath, cdnMaps, isAudioPlaying, playingDialect } =
+      this.data;
+    const selectedDialect = e.currentTarget.dataset.dialect;
 
-    // 如果正在播放，直接返回
-    if (isAudioPlaying) return;
+    // 如果正在播放同一个方言，直接返回
+    if (isAudioPlaying && playingDialect === selectedDialect) return;
 
     console.log(
-      this.data,
       "resultAudioPath:",
       resultAudioPath,
-      "cdnMap:",
-      cdnMap
+      "selectedDialect:",
+      selectedDialect,
+      "cdnMaps:",
+      cdnMaps
     );
-    if (!resultAudioPath || !cdnMap) return;
 
-    const audioUrls = cdnMap[resultAudioPath];
-    if (!audioUrls) return;
+    // 兼容单方言和多方言结构
+    let audioUrls;
+    if (cdnMaps && cdnMaps[selectedDialect]) {
+      // 多方言结构
+      audioUrls = cdnMaps[selectedDialect][resultAudioPath];
+    } else if (cdnMaps && cdnMaps[resultAudioPath]) {
+      // 单方言结构（向后兼容）
+      audioUrls = cdnMaps[resultAudioPath];
+    }
 
-    // 设置播放状态为true，禁用按钮
+    if (!audioUrls) {
+      console.warn("❌ 未找到音频URL:", resultAudioPath);
+      return;
+    }
+
+    // 设置播放状态为true，设置当前播放的方言
     this.setData({
       isAudioPlaying: true,
+      playingDialect: selectedDialect,
     });
 
     const urls = [audioUrls.ghfast, audioUrls.jsdelivr, audioUrls.raw]; // 播放优先顺序
@@ -1753,6 +1780,7 @@ Page({
         // 播放失败，恢复按钮状态
         this.setData({
           isAudioPlaying: false,
+          playingDialect: null,
         });
         return;
       }
@@ -1772,6 +1800,7 @@ Page({
         // 播放完成，恢复按钮状态
         this.setData({
           isAudioPlaying: false,
+          playingDialect: null,
         });
         audioCtx.destroy(); // 销毁音频上下文
       });
@@ -1781,6 +1810,7 @@ Page({
         // 播放停止，恢复按钮状态
         this.setData({
           isAudioPlaying: false,
+          playingDialect: null,
         });
         audioCtx.destroy(); // 销毁音频上下文
       });

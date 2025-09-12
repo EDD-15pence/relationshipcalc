@@ -113,10 +113,10 @@ if errorlevel 1 (
 
 echo.
 echo 📋 步骤 6/6
-echo 🚀 生成音频并上传到 GitHub
-echo 运行: 05-audio\upload_to_github.py
+echo 🚀 生成多方言音频并上传到 GitHub
+echo 运行: 05-audio\upload_to_github_multi_dialect.py
 cd /d "%~dp0\05-audio"
-python upload_to_github.py
+python upload_to_github_multi_dialect.py
 if errorlevel 1 (
     echo ❌ 步骤 6 失败
     pause
@@ -138,7 +138,7 @@ echo   • 验证缺失关系
 echo   • 同步缺失关系到代码
 echo   • 规范化关系名称
 echo   • 提取关系到 relations.json
-echo   • 生成音频并上传到 GitHub
+echo   • 生成多方言音频并上传到 GitHub
 echo.
 echo 🚀 项目维护完成！音频文件已可通过 CDN 访问
 echo.
