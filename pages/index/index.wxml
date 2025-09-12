@@ -19,10 +19,10 @@
     </view>
     <view class="result-row">
       <text class="result-large">{{displayResult}}</text>
-      <view class="audio-buttons" wx:if="{{displayResult}}">
-        <text class="audio-btn {{playingDialect === 'zh-cn' ? 'audio-disabled' : ''}}" bindtap="onPlayAudio" data-dialect="zh-cn">普</text>
-        <text class="audio-btn {{playingDialect === 'zh-yue' ? 'audio-disabled' : ''}}" bindtap="onPlayAudio" data-dialect="zh-yue">粤</text>
-      </view>
+                <view class="audio-buttons" wx:if="{{displayResult}}">
+                    <text class="audio-btn {{playingDialect === 'zh-cn' ? 'audio-disabled' : ''}}" bindtap="onPlayAudio" data-dialect="zh-cn">普</text>
+                    <text class="audio-btn {{playingDialect === 'zh-yue' ? 'audio-disabled' : ''}}" bindtap="onPlayAudio" data-dialect="zh-yue">粤</text>
+                </view>
     </view>
   </view>
 

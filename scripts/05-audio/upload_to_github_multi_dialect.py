@@ -28,14 +28,6 @@ DIALECTS = {
             "lang": "canton"
         }
     },
-    "zh-min": {
-        "name": "闽南话",
-        "tts_config": {
-            "am": "fastspeech2_cnndecoder_aishell3",
-            "voc": "hifigan_aishell3", 
-            "lang": "zh"
-        }
-    }
 }
 
 # 从 JSON 加载关系表
@@ -65,11 +57,11 @@ for dialect_code, dialect_info in DIALECTS.items():
     # 初始化CDN映射
     dialect_cdn_maps[dialect_code] = {}
 
-print(f"🎯 开始生成 {len(DIALECTS)} 种方言的音频文件...")
+print(f"开始生成 {len(DIALECTS)} 种方言的音频文件...")
 
 # 为每种方言生成音频
 for dialect_code, dialect_info in DIALECTS.items():
-    print(f"\n🗣️ 生成 {dialect_info['name']} 音频...")
+    print(f"\n生成 {dialect_info['name']} 音频...")
     
     tts_config = dialect_tts[dialect_code]
     dialect_dir = dialect_dirs[dialect_code]
@@ -81,6 +73,10 @@ for dialect_code, dialect_info in DIALECTS.items():
         if "的" in text:
             print(f"跳过复杂关系: {key} -> {text}")
             continue
+        
+        # 调试输出：检查"自己"相关的键
+        if text == "自己":
+            print(f"处理'自己'关系: {key} -> {text}")
 
         # 如果该中文已生成过，复用同一个文件
         if text in text_to_filename:
@@ -112,15 +108,25 @@ for dialect_code, dialect_info in DIALECTS.items():
             "jsdelivr": f"https://cdn.jsdelivr.net/gh/{GITHUB_USER}/{REPO_NAME}@{BRANCH}/assets/audio/{dialect_code}/{filename}",
             "ghfast": f"https://ghfast.top/https://raw.githubusercontent.com/{GITHUB_USER}/{REPO_NAME}/{BRANCH}/assets/audio/{dialect_code}/{filename}"
         }
+    
+    # 为"自己"添加特殊映射（用于空路径的情况）
+    if "自己" in text_to_filename:
+        filename = text_to_filename["自己"]
+        cdn_map["self"] = {
+            "text": "自己",
+            "raw": f"https://raw.githubusercontent.com/{GITHUB_USER}/{REPO_NAME}/{BRANCH}/assets/audio/{dialect_code}/{filename}",
+            "jsdelivr": f"https://cdn.jsdelivr.net/gh/{GITHUB_USER}/{REPO_NAME}@{BRANCH}/assets/audio/{dialect_code}/{filename}",
+            "ghfast": f"https://ghfast.top/https://raw.githubusercontent.com/{GITHUB_USER}/{REPO_NAME}/{BRANCH}/assets/audio/{dialect_code}/{filename}"
+        }
 
-    print(f"✅ {dialect_info['name']} 音频生成完成，共 {len(cdn_map)} 个文件")
+    print(f"{dialect_info['name']} 音频生成完成，共 {len(cdn_map)} 个文件")
 
 # 保存各方言的映射表
 for dialect_code, dialect_info in DIALECTS.items():
     cdn_map_path = os.path.join(LOCAL_REPO_PATH, f"cdn_map_{dialect_code}.json")
     with open(cdn_map_path, "w", encoding="utf-8") as f:
         json.dump(dialect_cdn_maps[dialect_code], f, ensure_ascii=False, indent=2)
-    print(f"✅ cdn_map_{dialect_code}.json 已生成")
+    print(f"cdn_map_{dialect_code}.json 已生成")
 
 # 生成统一的CDN映射表（包含所有方言）
 unified_cdn_map = {}
@@ -130,7 +136,7 @@ for dialect_code, dialect_info in DIALECTS.items():
 unified_cdn_map_path = os.path.join(LOCAL_REPO_PATH, "cdn_map_unified.json")
 with open(unified_cdn_map_path, "w", encoding="utf-8") as f:
     json.dump(unified_cdn_map, f, ensure_ascii=False, indent=2)
-print(f"✅ 统一CDN映射表 cdn_map_unified.json 已生成")
+print(f"统一CDN映射表 cdn_map_unified.json 已生成")
 
 # Git 提交 & 推送
 repo = Repo(LOCAL_REPO_PATH) if os.path.exists(os.path.join(LOCAL_REPO_PATH, ".git")) else Repo.init(LOCAL_REPO_PATH)
@@ -145,11 +151,11 @@ repo.git.add(all=True)
 if repo.is_dirty(untracked_files=True):
     repo.index.commit("更新多方言音频和CDN映射表")
     repo.remote(name="relationship-audio").push(refspec=f"{BRANCH}:{BRANCH}")
-    print("✅ 已推送到 GitHub")
+    print("已推送到 GitHub")
 else:
-    print("ℹ️ 没有变化，无需提交")
+    print("没有变化，无需提交")
 
-print(f"\n🎉 多方言音频生成完成！")
-print(f"📁 生成的方言: {', '.join([info['name'] for info in DIALECTS.values()])}")
-print(f"📊 每种方言生成文件数: {len([k for k, v in relations.items() if '的' not in v])}")
+print(f"\n多方言音频生成完成！")
+print(f"生成的方言: {', '.join([info['name'] for info in DIALECTS.values()])}")
+print(f"每种方言生成文件数: {len([k for k, v in relations.items() if '的' not in v])}")
 

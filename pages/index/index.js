@@ -1180,6 +1180,9 @@ relationshipMappings.forEach((mapping) => {
   }
 });
 
+// 为"自己"添加特殊映射
+nameToTokenPath["自己"] = ["self"];
+
 const resultMap = {};
 
 // 处理亲属关系映射
@@ -1373,7 +1376,7 @@ function findResult(isMale, pathTokens) {
 
   const direct = resultMap[key(sex, norm)];
   if (direct) return { name: direct, path: norm };
-  if (norm.length === 0) return { name: "自己", path: [] };
+  if (norm.length === 0) return { name: "自己", path: ["self"] };
   if (norm.every((t) => t === "f" || t === "m"))
     return { name: buildAncestorName(norm), path: norm };
   if (norm.every((t) => t === "s" || t === "d"))
@@ -1420,7 +1423,7 @@ function findResult(isMale, pathTokens) {
 
 function findReverseResult(isMale, pathTokens) {
   const norm = normalizePath(pathTokens);
-  if (norm.length === 0) return "自己";
+  if (norm.length === 0) return { name: "自己", path: ["self"] };
   const male = !!isMale;
   if (norm.length === 1) {
     switch (norm[0]) {
@@ -1699,11 +1702,10 @@ Page({
     let resultAudioPath = "";
     if (tokens.length > 0) {
       if (this.data.reverseMode) {
-        displayResult = findReverseResult(this.data.isMale, tokens);
-        const mainResult = displayResult.split("/")[0];
-        const resultPath = nameToTokenPath[mainResult];
-        if (resultPath) {
-          resultAudioPath = resultPath.join("");
+        const reverseResult = findReverseResult(this.data.isMale, tokens);
+        displayResult = reverseResult.name;
+        if (reverseResult.path) {
+          resultAudioPath = reverseResult.path.join("");
         }
       } else {
         const result = findResult(this.data.isMale, tokens);
@@ -1750,6 +1752,15 @@ Page({
       "cdnMaps:",
       cdnMaps
     );
+
+    // 调试：检查"自己"的映射
+    if (resultAudioPath === "") {
+      console.log(
+        "resultAudioPath为空，检查nameToTokenPath中的'自己':",
+        nameToTokenPath["自己"]
+      );
+      console.log("检查nameToTokenPath中的'self':", nameToTokenPath["self"]);
+    }
 
     // 兼容单方言和多方言结构
     let audioUrls;
