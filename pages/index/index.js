@@ -381,7 +381,7 @@ const relationshipMappings = [
   { path: ["h", "s", "m"], name: "儿媳", gender: "female" },
   { path: ["h", "s", "ob"], name: "长孙", gender: "male" },
   { path: ["h", "s", "os"], name: "长孙女", gender: "female" },
-  { path: ["h", "s", "s"], name: "孙子", gender: "male" },
+  { path: ["h", "s", "s"], name: "孙子", gender: "both" },
   { path: ["h", "s", "w"], name: "孙媳", gender: "female" },
   { path: ["h", "s", "yb"], name: "次孙", gender: "male" },
   { path: ["h", "s", "ys"], name: "次孙女", gender: "female" },
@@ -1424,38 +1424,67 @@ function findResult(isMale, pathTokens) {
 function findReverseResult(isMale, pathTokens) {
   const norm = normalizePath(pathTokens);
   if (norm.length === 0) return { name: "自己", path: ["self"] };
-  const male = !!isMale;
-  if (norm.length === 1) {
-    switch (norm[0]) {
+
+  // 反向逻辑：逐个反向后再逆向链接
+  const reversePath = [];
+  for (let i = norm.length - 1; i >= 0; i--) {
+    const token = norm[i];
+    switch (token) {
       case "f":
+        reversePath.push("s");
+        break;
       case "m":
-        return male ? "儿子" : "女儿";
+        reversePath.push("d");
+        break;
       case "s":
+        reversePath.push("f");
+        break;
       case "d":
-        return male ? "爸爸" : "妈妈";
+        reversePath.push("m");
+        break;
       case "w":
-        return "老公";
+        reversePath.push("h");
+        break;
       case "h":
-        return "老婆";
+        reversePath.push("w");
+        break;
       case "ob":
-        return male ? "弟弟" : "妹妹";
+        reversePath.push("yb");
+        break;
       case "yb":
-        return male ? "哥哥" : "姐姐";
+        reversePath.push("ob");
+        break;
       case "os":
-        return male ? "弟弟" : "妹妹";
+        reversePath.push("ys");
+        break;
       case "ys":
-        return male ? "哥哥" : "姐姐";
+        reversePath.push("os");
+        break;
       default:
-        return "未收录的关系（待完善）";
+        reversePath.push(token);
+        break;
     }
   }
+
+  // 使用正向计算函数计算反向路径的结果
+  const result = findResult(isMale, reversePath);
+  return result;
 
   // 处理多代祖辈关系
   if (norm.every((t) => t === "f" || t === "m")) {
     const generation = norm.length;
-    if (generation === 2) return isMale ? "孙子" : "孙女";
-    if (generation === 3) return isMale ? "曾孙子" : "曾孙女";
-    if (generation >= 4) return isMale ? "玄孙子" : "玄孙女";
+    if (generation === 2)
+      return { name: isMale ? "孙子" : "孙女", path: isMale ? ["s"] : ["d"] };
+    if (generation === 3)
+      return {
+        name: isMale ? "曾孙子" : "曾孙女",
+        path: isMale ? ["s", "s"] : ["d", "d"],
+      };
+    if (generation >= 4)
+      return {
+        name: isMale ? "玄孙子" : "玄孙女",
+        path: isMale ? ["s", "s", "s"] : ["d", "d", "d"],
+      };
   }
 
   const a = norm[0],
@@ -1466,45 +1495,51 @@ function findReverseResult(isMale, pathTokens) {
   if (norm.length === 3 && (c === "s" || c === "d")) {
     // 堂亲
     if (a === "f" && (b === "ob" || b === "yb")) {
-      return `堂${male ? "兄/弟" : "姐/妹"}`;
+      return { name: `堂${male ? "兄/弟" : "姐/妹"}`, path: ["f", b, c] };
     }
     // 表亲 (父系)
     if (a === "f" && (b === "os" || b === "ys")) {
-      return `表${male ? "兄/弟" : "姐/妹"}`;
+      return { name: `表${male ? "兄/弟" : "姐/妹"}`, path: ["f", b, c] };
     }
     // 表亲 (母系)
     if (a === "m" && (b === "ob" || b === "yb" || b === "os" || b === "ys")) {
-      return `表${male ? "兄/弟" : "姐/妹"}`;
+      return { name: `表${male ? "兄/弟" : "姐/妹"}`, path: ["m", b, c] };
     }
   }
 
   // 长度为2的关系链
   if (norm.length === 2) {
     if ((a === "ob" || a === "yb") && (b === "s" || b === "d"))
-      return male ? "伯伯/叔叔" : "姑姑";
+      return { name: male ? "伯伯/叔叔" : "姑姑", path: [a, b] };
     if ((a === "os" || a === "ys") && (b === "s" || b === "d"))
-      return male ? "舅舅" : "姨妈/小姨";
+      return { name: male ? "舅舅" : "姨妈/小姨", path: [a, b] };
     if (a === "f" && (b === "ob" || b === "yb" || b === "os" || b === "ys")) {
-      return male ? "侄子" : "侄女";
+      return { name: male ? "侄子" : "侄女", path: [a, b] };
     }
     if (a === "m" && (b === "ob" || b === "yb" || b === "os" || b === "ys")) {
-      return male ? "外甥" : "外甥女";
+      return { name: male ? "外甥" : "外甥女", path: [a, b] };
     }
     if (a === "m" && (b === "f" || b === "m"))
-      return isMale ? "外孙子" : "外孙女";
-    if (a === "w" && (b === "f" || b === "m")) return "女婿";
-    if (a === "h" && (b === "f" || b === "m")) return "儿媳";
+      return { name: isMale ? "外孙子" : "外孙女", path: [a, b] };
+    if (a === "w" && (b === "f" || b === "m"))
+      return { name: "女婿", path: [a, b] };
+    if (a === "h" && (b === "f" || b === "m"))
+      return { name: "儿媳", path: [a, b] };
     if ((a === "os" || a === "ys") && b === "h")
-      return male ? "内兄/内弟" : "大姨子/小姨子";
+      return { name: male ? "内兄/内弟" : "大姨子/小姨子", path: [a, b] };
     if ((a === "ob" || a === "yb") && b === "w")
-      return male ? "大伯子/小叔子" : "大姑子/小姑子";
-    if (a === "s" && b === "w") return male ? "公公" : "婆婆";
-    if (a === "d" && b === "h") return male ? "岳父" : "岳母";
-    if (a === "s" && (b === "s" || b === "d")) return male ? "爷爷" : "奶奶";
-    if (a === "d" && (b === "s" || b === "d")) return male ? "外公" : "外婆";
+      return { name: male ? "大伯子/小叔子" : "大姑子/小姑子", path: [a, b] };
+    if (a === "s" && b === "w")
+      return { name: male ? "公公" : "婆婆", path: [a, b] };
+    if (a === "d" && b === "h")
+      return { name: male ? "岳父" : "岳母", path: [a, b] };
+    if (a === "s" && (b === "s" || b === "d"))
+      return { name: male ? "爷爷" : "奶奶", path: [a, b] };
+    if (a === "d" && (b === "s" || b === "d"))
+      return { name: male ? "外公" : "外婆", path: [a, b] };
   }
 
-  return "未收录的关系（待完善）";
+  return { name: "未收录的关系（待完善）", path: [] };
 }
 
 function buildFormulaText(exprLabels, isMale, reverseMode) {
@@ -1623,7 +1658,9 @@ Page({
   },
 
   onToggleReverse() {
+    console.log("切换转换称呼模式，当前状态:", this.data.reverseMode);
     this.setData({ reverseMode: !this.data.reverseMode });
+    console.log("切换后状态:", !this.data.reverseMode);
     this._recompute();
   },
   onToggleTheme() {
@@ -1701,17 +1738,27 @@ Page({
     let displayResult = "";
     let resultAudioPath = "";
     if (tokens.length > 0) {
+      console.log(
+        "_recompute: reverseMode =",
+        this.data.reverseMode,
+        "tokens =",
+        tokens
+      );
       if (this.data.reverseMode) {
         const reverseResult = findReverseResult(this.data.isMale, tokens);
+        console.log("使用反向模式，结果:", reverseResult);
         displayResult = reverseResult.name;
         if (reverseResult.path) {
           resultAudioPath = reverseResult.path.join("");
+          console.log("反向模式生成的音频路径:", resultAudioPath);
         }
       } else {
         const result = findResult(this.data.isMale, tokens);
+        console.log("使用正向模式，结果:", result);
         displayResult = result.name;
         if (result.path) {
           resultAudioPath = `${result.path.join("")}`;
+          console.log("正向模式生成的音频路径:", resultAudioPath);
         }
       }
     }
@@ -1719,6 +1766,12 @@ Page({
     const tailGender = inferTailGender(tokens, this.data.isMale);
     const disableH = tailGender === "male";
     const disableW = tailGender === "female";
+    console.log(
+      "准备设置数据: displayResult =",
+      displayResult,
+      "formulaText =",
+      formulaText
+    );
     this.setData({
       formulaText,
       displayResult,
@@ -1726,6 +1779,10 @@ Page({
       disableH,
       disableW,
     });
+    // 使用setTimeout确保setData完成后再检查
+    setTimeout(() => {
+      console.log("数据设置完成，当前displayResult =", this.data.displayResult);
+    }, 0);
   },
 
   // onPlayAudio() {

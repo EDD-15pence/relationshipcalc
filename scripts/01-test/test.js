@@ -92,11 +92,14 @@ allCombinations.forEach((path, index) => {
   // 测试男性视角
   runTest(`正向-男: ${pathStr}`, () => {
     const result = findResult(true, path);
-    if (result === "未收录的关系（待完善）") {
+    if (
+      result.name === "未收录的关系（待完善）" ||
+      (result.name && result.name.includes("的"))
+    ) {
       missingRelations.push({
         type: "正向-男",
         path: pathStr,
-        result: result,
+        result: result.name,
       });
     }
     // 不抛出错误，只是记录未收录的关系
@@ -105,11 +108,14 @@ allCombinations.forEach((path, index) => {
   // 测试女性视角
   runTest(`正向-女: ${pathStr}`, () => {
     const result = findResult(false, path);
-    if (result === "未收录的关系（待完善）") {
+    if (
+      result.name === "未收录的关系（待完善）" ||
+      (result.name && result.name.includes("的"))
+    ) {
       missingRelations.push({
         type: "正向-女",
         path: pathStr,
-        result: result,
+        result: result.name,
       });
     }
     // 不抛出错误，只是记录未收录的关系
@@ -123,11 +129,14 @@ allCombinations.forEach((path, index) => {
   // 测试男性视角
   runTest(`反向-男: ${pathStr}`, () => {
     const result = findReverseResult(true, path);
-    if (result === "未收录的关系（待完善）") {
+    if (
+      result.name === "未收录的关系（待完善）" ||
+      (result.name && result.name.includes("的"))
+    ) {
       missingRelations.push({
         type: "反向-男",
         path: pathStr,
-        result: result,
+        result: result.name,
       });
     }
     // 不抛出错误，只是记录未收录的关系
@@ -136,11 +145,14 @@ allCombinations.forEach((path, index) => {
   // 测试女性视角
   runTest(`反向-女: ${pathStr}`, () => {
     const result = findReverseResult(false, path);
-    if (result === "未收录的关系（待完善）") {
+    if (
+      result.name === "未收录的关系（待完善）" ||
+      (result.name && result.name.includes("的"))
+    ) {
       missingRelations.push({
         type: "反向-女",
         path: pathStr,
-        result: result,
+        result: result.name,
       });
     }
     // 不抛出错误，只是记录未收录的关系
