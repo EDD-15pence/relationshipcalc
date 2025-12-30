@@ -1,52 +1,41 @@
 <view class="container {{isDark ? 'dark' : ''}}">
-  <view class="top">
-    <view class="top-bar">
-      <view class="gender">
-        <text class="label">我的性别</text>
-        <radio-group class="gender-group" bindchange="onChangeGender">
-          <label class="gender-item"><radio value="male" checked="{{isMale}}" color='#000000' /> 男</label>
-          <label class="gender-item"><radio value="female" checked="{{!isMale}}" color='#000000' /> 女</label>
-        </radio-group>
-      </view>
-      <view class="top-actions">
-        <button class="icon-btn" hover-class="icon-hover" bindtap="onToggleReverse">🔄</button>
-        <button class="icon-btn" hover-class="icon-hover" bindtap="onToggleTheme">{{isDark ? '🌙' : '☀️'}}</button>
-        <button class="icon-btn" hover-class="icon-hover" open-type="share">📤</button>
-      </view>
-    </view>
-    <view class="formula-row">
-      <text class="formula">{{formulaText}}</text>
-    </view>
-    <view class="result-row">
-      <text class="result-large">{{displayResult}}</text>
-                <view class="audio-buttons" wx:if="{{displayResult}}">
-                    <text class="audio-btn {{playingDialect === 'zh-cn' ? 'audio-disabled' : ''}}" bindtap="onPlayAudio" data-dialect="zh-cn">普</text>
-                    <text class="audio-btn {{playingDialect === 'zh-yue' ? 'audio-disabled' : ''}}" bindtap="onPlayAudio" data-dialect="zh-yue">粤</text>
-                </view>
+  <!-- 顶部导航栏 -->
+  <view class="navbar">
+    <text class="navbar-title">工具箱</text>
+    <view class="navbar-actions">
+      <button class="icon-btn" hover-class="icon-hover" bindtap="onToggleTheme">{{isDark ? '🌙' : '☀️'}}</button>
     </view>
   </view>
 
-  <view class="spacer"></view>
+  <!-- 工具网格 -->
+  <view class="tools-grid">
+    <!-- 亲属称呼换算器卡片 -->
+    <view class="tool-card" bindtap="navigateToTool" data-tool="relationship">
+      <view class="tool-icon">👨‍👩‍👧‍👦</view>
+      <text class="tool-name">亲属称呼换算</text>
+      <text class="tool-desc">快速计算亲属关系称呼</text>
+    </view>
 
-  <view class="keypad">
-    <view class="row">
-      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="爸爸">爸爸</button>
-      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="妈妈">妈妈</button>
-      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="老公" disabled="{{disableH}}">老公</button>
-      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="老婆" disabled="{{disableW}}">老婆</button>
+    <!-- 打卡工具卡片 -->
+    <view class="tool-card" bindtap="navigateToTool" data-tool="punchin">
+      <view class="tool-icon">📅</view>
+      <text class="tool-name">打卡</text>
+      <text class="tool-desc">记录你的打卡时间</text>
     </view>
-    <view class="row">
-      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="哥哥">哥哥</button>
-      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="弟弟">弟弟</button>
-      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="姐姐">姐姐</button>
-      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="妹妹">妹妹</button>
+
+    <!-- 未来可以添加更多工具卡片 -->
+    <!-- 
+    <view class="tool-card" bindtap="navigateToTool" data-tool="other">
+      <view class="tool-icon">🎯</view>
+      <text class="tool-name">其他工具</text>
+      <text class="tool-desc">敬请期待</text>
     </view>
-    <view class="row">
-      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="儿子">儿子</button>
-      <button class="key" hover-class="btn-press" bindtap="onTapKey" data-key="女儿">女儿</button>
-      <button class="key back" hover-class="btn-press" bindtap="onTapKey" data-key="回退">回退</button>
-      <button class="key clear" hover-class="btn-press" bindtap="onTapKey" data-key="清空">清空</button>
-    </view>
+    -->
+  </view>
+
+  <!-- 底部说明 -->
+  <view class="footer">
+    <text class="footer-text">点击卡片打开对应工具</text>
   </view>
 </view>
 

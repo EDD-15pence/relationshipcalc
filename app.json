@@ -1,6 +1,8 @@
 {
   "pages": [
-    "pages/index/index"
+  "pages/index/index",
+  "pages/relationship/relationship",
+  "pages/punchin/punchin"
   ],
   "window": {
     "navigationBarTitleText": "亲属称呼换算",

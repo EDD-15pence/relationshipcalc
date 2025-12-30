@@ -119,15 +119,6 @@ for dialect_code, dialect_info in DIALECTS.items():
             "ghfast": f"https://ghfast.top/https://raw.githubusercontent.com/{GITHUB_USER}/{REPO_NAME}/{BRANCH}/assets/audio/{dialect_code}/{filename}"
         }
     
-    # 为"sd"添加特殊映射（用于转换称呼功能）
-    if "孙女" in text_to_filename:
-        filename = text_to_filename["孙女"]
-        cdn_map["sd"] = {
-            "text": "孙女",
-            "raw": f"https://raw.githubusercontent.com/{GITHUB_USER}/{REPO_NAME}/{BRANCH}/assets/audio/{dialect_code}/{filename}",
-            "jsdelivr": f"https://cdn.jsdelivr.net/gh/{GITHUB_USER}/{REPO_NAME}@{BRANCH}/assets/audio/{dialect_code}/{filename}",
-            "ghfast": f"https://ghfast.top/https://raw.githubusercontent.com/{GITHUB_USER}/{REPO_NAME}/{BRANCH}/assets/audio/{dialect_code}/{filename}"
-        }
 
     print(f"{dialect_info['name']} 音频生成完成，共 {len(cdn_map)} 个文件")
 

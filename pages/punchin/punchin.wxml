@@ -1,0 +1,188 @@
+<view class="container {{isDark ? 'dark' : ''}}">
+  <view class="navbar">
+    <text class="title">习惯打卡</text>
+    <view class="navbar-actions">
+      <button class="icon-btn" bindtap="onShowAddModal">➕</button>
+      <button class="icon-btn" bindtap="onToggleTheme">{{isDark ? '🌙' : '☀️'}}</button>
+    </view>
+  </view>
+
+  <view class="content">
+    <!-- 当前时间 -->
+    <view class="time-card">
+      <text class="time-label">现在时间</text>
+      <text class="now-time">{{nowTime}}</text>
+    </view>
+
+    <!-- 习惯列表 -->
+    <view class="habits-list">
+      <block wx:for="{{habits}}" wx:key="id">
+        <view class="habit-card" style="border-left-color: {{item.color}}">
+          <view class="habit-header">
+            <view class="habit-info">
+              <text class="habit-icon">{{item.icon}}</text>
+              <view class="habit-name-wrapper">
+                <text class="habit-name">{{item.name}}</text>
+                <text class="habit-difficulty difficulty-{{item.difficulty}}">
+                  {{item.difficulty === 'easy' ? '简单' : item.difficulty === 'medium' ? '中等' : '困难'}}
+                </text>
+              </view>
+            </view>
+            <view class="habit-actions">
+              <button class="action-btn" bindtap="onEditHabit" data-id="{{item.id}}">✏️</button>
+              <button class="action-btn" bindtap="onDeleteHabit" data-id="{{item.id}}">🗑️</button>
+            </view>
+          </view>
+
+          <!-- 统计信息（动机增强） -->
+          <view class="habit-stats">
+            <view class="stat-item">
+              <text class="stat-label">连续</text>
+              <text class="stat-value highlight">{{item.consecutiveDays}}天</text>
+            </view>
+            <view class="stat-item">
+              <text class="stat-label">总计</text>
+              <text class="stat-value">{{item.totalDays}}天</text>
+            </view>
+            <view class="stat-item">
+              <text class="stat-label">本月</text>
+              <text class="stat-value">{{item.monthProgress}}%</text>
+            </view>
+            <view class="stat-item" bindtap="onViewHabitDetail" data-id="{{item.id}}">
+              <text class="stat-label">详情</text>
+              <text class="stat-value">📊</text>
+            </view>
+          </view>
+
+          <!-- 进度条（动机可视化） -->
+          <view class="progress-wrapper">
+            <view class="progress-bar">
+              <view class="progress-fill" style="width: {{item.monthProgress}}%; background-color: {{item.color}}"></view>
+            </view>
+          </view>
+
+          <!-- 打卡按钮（能力：简化操作） -->
+          <view class="checkin-section">
+            <button 
+              class="checkin-btn {{item.isTodayChecked ? 'checked' : ''}}" 
+              style="background-color: {{item.isTodayChecked ? '#4cd964' : item.color}}"
+              bindtap="{{item.isTodayChecked ? 'onUncheck' : 'onCheckIn'}}"
+              data-id="{{item.id}}">
+              {{item.isTodayChecked ? '✓ 已打卡' : '打卡'}}
+            </button>
+            <text wx:if="{{item.reminderTime}}" class="reminder-text">⏰ {{item.reminderTime}}</text>
+          </view>
+        </view>
+      </block>
+
+      <!-- 空状态 -->
+      <view wx:if="{{habits.length === 0}}" class="empty-state">
+        <text class="empty-icon">📝</text>
+        <text class="empty-text">还没有习惯</text>
+        <text class="empty-hint">点击右上角 ➕ 添加你的第一个习惯吧！</text>
+        <button class="btn-primary" bindtap="onShowAddModal">创建习惯</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 添加/编辑习惯弹窗 -->
+  <view wx:if="{{showAddModal}}" class="modal-overlay" bindtap="onCloseAddModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">{{editingHabit ? '编辑习惯' : '新建习惯'}}</text>
+        <button class="modal-close" bindtap="onCloseAddModal">✕</button>
+      </view>
+
+      <view class="modal-body">
+        <!-- 习惯名称 -->
+        <view class="form-item">
+          <text class="form-label">习惯名称</text>
+          <input 
+            class="form-input" 
+            placeholder="例如：每天运动30分钟"
+            value="{{newHabit.name}}"
+            bindinput="onHabitNameInput"
+            maxlength="20" />
+        </view>
+
+        <!-- 选择图标 -->
+        <view class="form-item">
+          <text class="form-label">图标</text>
+          <view class="icon-selector">
+            <view 
+              wx:for="{{['✅', '🏃', '📚', '💧', '🧘', '🎯', '🌱', '💪', '📖', '🎨', '🎵', '😴']}}" 
+              wx:key="*this"
+              class="icon-option {{newHabit.icon === item ? 'selected' : ''}}"
+              bindtap="onSelectIcon"
+              data-icon="{{item}}">
+              {{item}}
+            </view>
+          </view>
+        </view>
+
+        <!-- 选择颜色 -->
+        <view class="form-item">
+          <text class="form-label">主题色</text>
+          <view class="color-selector">
+            <view 
+              wx:for="{{['#007aff', '#34c759', '#ff9500', '#ff3b30', '#af52de', '#ff2d55', '#5856d6', '#00c7be']}}" 
+              wx:key="*this"
+              class="color-option {{newHabit.color === item ? 'selected' : ''}}"
+              style="background-color: {{item}}"
+              bindtap="onSelectColor"
+              data-color="{{item}}">
+              <text wx:if="{{newHabit.color === item}}" class="check-mark">✓</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 选择难度（能力维度） -->
+        <view class="form-item">
+          <text class="form-label">难度（能力）</text>
+          <view class="difficulty-selector">
+            <view 
+              class="difficulty-option {{newHabit.difficulty === 'easy' ? 'selected' : ''}}"
+              bindtap="onSelectDifficulty"
+              data-difficulty="easy">
+              <text class="difficulty-label">简单</text>
+              <text class="difficulty-desc">容易完成</text>
+            </view>
+            <view 
+              class="difficulty-option {{newHabit.difficulty === 'medium' ? 'selected' : ''}}"
+              bindtap="onSelectDifficulty"
+              data-difficulty="medium">
+              <text class="difficulty-label">中等</text>
+              <text class="difficulty-desc">需要一定努力</text>
+            </view>
+            <view 
+              class="difficulty-option {{newHabit.difficulty === 'hard' ? 'selected' : ''}}"
+              bindtap="onSelectDifficulty"
+              data-difficulty="hard">
+              <text class="difficulty-label">困难</text>
+              <text class="difficulty-desc">挑战性较大</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 提醒时间（触发） -->
+        <view class="form-item">
+          <text class="form-label">提醒时间（触发）</text>
+          <picker 
+            mode="time" 
+            value="{{newHabit.reminderTime}}"
+            bindchange="onReminderTimeChange">
+            <view class="picker-wrapper">
+              <text class="picker-text">{{newHabit.reminderTime || '不设置提醒'}}</text>
+              <text class="picker-arrow">›</text>
+            </view>
+          </picker>
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <button class="btn-cancel" bindtap="onCloseAddModal">取消</button>
+        <button class="btn-save" bindtap="onSaveHabit">保存</button>
+      </view>
+    </view>
+  </view>
+</view>
