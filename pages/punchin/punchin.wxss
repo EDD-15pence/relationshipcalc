@@ -105,8 +105,8 @@
 }
 
 .habit-difficulty {
-  font-size: 11px;
-  padding: 2px 8px;
+  font-size: 12px;
+  padding: 0px 5px 12px 5px;
   border-radius: 10px;
   display: inline-block;
   width: fit-content;
