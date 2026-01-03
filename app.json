@@ -2,7 +2,9 @@
   "pages": [
   "pages/index/index",
   "pages/relationship/relationship",
-  "pages/punchin/punchin"
+  "pages/punchin/punchin",
+  "pages/prompt/index/index",
+  "pages/prompt/detail/index"
   ],
   "window": {
     "navigationBarTitleText": "亲属称呼换算",

@@ -1,0 +1,24 @@
+<!--
+  This file follows:
+  docs/prompt-tool-design.md
+  docs/prompt-tool-folder-structure.md
+-->
+<view class="container">
+  <view class="header">Prompt 模板详情</view>
+  <view wx:if="{{template}}">
+    <view class="prompt-title">{{template.title}}</view>
+    <view class="prompt-desc">{{template.description}}</view>
+    <view class="prompt-vars">
+      <block wx:for="{{template.variables}}" wx:key="key">
+        <view class="var-item">
+          <text class="var-label">{{item.label}}</text>
+          <input class="var-input" placeholder="{{item.placeholder}}" value="{{varValues[item.key]}}" bindinput="onVarInput" data-key="{{item.key}}" />
+        </view>
+      </block>
+    </view>
+    <button class="copy-btn" bindtap="onCopyPrompt">复制 Prompt</button>
+    <view class="copy-tip">{{copyTip}}</view>
+  </view>
+  <view wx:else>未找到模板</view>
+</view>
+

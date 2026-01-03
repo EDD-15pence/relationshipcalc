@@ -16,11 +16,19 @@
       <text class="tool-desc">快速计算亲属关系称呼</text>
     </view>
 
+
     <!-- 打卡工具卡片 -->
     <view class="tool-card" bindtap="navigateToTool" data-tool="punchin">
       <view class="tool-icon">📅</view>
       <text class="tool-name">打卡</text>
       <text class="tool-desc">记录你的打卡时间</text>
+    </view>
+
+    <!-- Prompt模板工具卡片 -->
+    <view class="tool-card" bindtap="navigateToTool" data-tool="prompt">
+      <view class="tool-icon">📝</view>
+      <text class="tool-name">Prompt模板工具</text>
+      <text class="tool-desc">一键生成高质量AI提示词</text>
     </view>
 
     <!-- 未来可以添加更多工具卡片 -->

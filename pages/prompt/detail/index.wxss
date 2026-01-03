@@ -1,0 +1,9 @@
+.container { padding: 20px; }
+.header { font-size: 20px; font-weight: bold; margin-bottom: 16px; }
+.prompt-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.prompt-desc { font-size: 13px; color: #888; margin-bottom: 16px; }
+.var-item { margin-bottom: 12px; }
+.var-label { font-size: 13px; color: #333; margin-bottom: 4px; display: block; }
+.var-input { width: 100%; border: 1px solid #eee; border-radius: 6px; padding: 8px; font-size: 14px; }
+.copy-btn { margin-top: 20px; background: #007aff; color: #fff; border-radius: 8px; padding: 10px 0; font-size: 15px; }
+.copy-tip { color: #888; font-size: 12px; margin-top: 8px; }

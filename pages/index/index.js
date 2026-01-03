@@ -21,7 +21,8 @@
     
     const toolMap = {
       relationship: '/pages/relationship/relationship',
-      punchin: '/pages/punchin/punchin'
+      punchin: '/pages/punchin/punchin',
+      prompt: '/pages/prompt/index/index'
     };
 
     const targetPath = toolMap[toolName];
